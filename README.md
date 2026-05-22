@@ -1,2 +1,2 @@
 # comfy-quants
-Utility scripts to quantize models in optimal ComfyUI formata.
+Utility scripts to quantize models in optimal ComfyUI format.
