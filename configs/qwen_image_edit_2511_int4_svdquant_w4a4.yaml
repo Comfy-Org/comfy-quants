@@ -1,0 +1,27 @@
+project:
+  name: qwen-image-edit-2511-int4-svdquant-w4a4
+model:
+  family: qwen_image_edit
+  model_id: /absolute/path/to/qwen-image-edit-2511/diffusion_pytorch_model.safetensors
+  source: local
+  dtype: bf16
+quant:
+  algorithm: svdquant_w4a4_full_pipeline
+  target_dtype: svdquant_w4a4
+  quantization_mode: calibrated_svdquant
+  rank: 64
+  group_size: 64
+  scale_dtype: source
+  calibration: /absolute/path/to/calibration.jsonl
+  activation_stats: /absolute/path/to/int4_activation_stats.json
+  smooth_alpha: 0.5
+  smooth_min: 0.015625
+  smooth_max: 64.0
+artifact:
+  output: runs/qwen-edit-2511/int4-svdquant-w4a4
+  single_file: true
+  storage_layout: kitchen_tile_packed_w4a4
+hardware:
+  gpu_profile: rtx_pro_6000_blackwell_96gb
+  default_device: cuda:0
+  cpu_fallback: true

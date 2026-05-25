@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Comfy Quants QuantTensor Metadata",
+  "type": "object",
+  "required": ["name", "source_name", "shape", "source_dtype", "quant_dtype", "storage_dtype", "algorithm", "scale", "packing", "rounding", "fallback", "compatibility_level"],
+  "properties": {
+    "name": {"type": "string"},
+    "source_name": {"type": "string"},
+    "shape": {"type": "array", "items": {"type": "integer"}},
+    "source_dtype": {"type": "string"},
+    "quant_dtype": {"type": "string"},
+    "storage_dtype": {"type": "string"},
+    "algorithm": {"type": "string"},
+    "scale": {"type": "object"},
+    "payload": {"type": ["object", "null"]},
+    "packing": {"type": "object"},
+    "rounding": {"type": "string"},
+    "fallback": {"type": "boolean"},
+    "compatibility_level": {"type": "string"},
+    "metadata": {"type": "object"}
+  }
+}
