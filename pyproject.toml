@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comfy-quants"
+version = "0.1.0"
+description = "ComfyUI-aligned CLI-first offline quantization sub-library for Qwen-Image and Qwen-Image-Edit."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Comfy Quants Project"}]
+dependencies = ["PyYAML>=6.0", "safetensors>=0.4.0"]
+
+[project.optional-dependencies]
+int4-oracle = [
+  "deepcompressor",
+  "nunchaku",
+]
+
+[project.scripts]
+comfy-quants = "comfy_quants.cli.main:main"
+comfy_quants = "comfy_quants.cli.main:main"
+comfy-reduction = "comfy_quants.cli.main:main"
+comfy_reduction = "comfy_quants.cli.main:main"
+genquant = "genquant.cli.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

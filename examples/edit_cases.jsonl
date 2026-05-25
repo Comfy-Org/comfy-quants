@@ -1,0 +1,2 @@
+{"id":"edit_text_cn_001","image":"sign_001.png","prompt":"把招牌上的文字改成‘阿里巴巴’，保持背景不变","edit_type":"text_edit","language":"zh"}
+{"id":"appearance_001","image":"person_001.png","prompt":"让人物换成蓝色外套，脸部和背景保持不变","edit_type":"appearance_preserve","language":"zh"}
