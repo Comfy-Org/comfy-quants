@@ -24,6 +24,14 @@ class QwenImageEditInt4LinearSpec:
         return self.output_suffix if self.branch_suffix is None else self.branch_suffix
 
 
+@dataclass(frozen=True)
+class GroupedQKVBranchSpec:
+    """Low-rank branch anchor whose output rows cover split Q/K/V targets."""
+
+    anchor_suffix: str
+    target_suffixes: tuple[str, str, str]
+
+
 SVDQUANT_LINEAR_SPECS: tuple[QwenImageEditInt4LinearSpec, ...] = (
     QwenImageEditInt4LinearSpec("attn.to_q", ("attn.to_q",)),
     QwenImageEditInt4LinearSpec("attn.to_k", ("attn.to_k",)),
@@ -37,6 +45,11 @@ SVDQUANT_LINEAR_SPECS: tuple[QwenImageEditInt4LinearSpec, ...] = (
     QwenImageEditInt4LinearSpec("img_mlp.net.2", ("img_mlp.net.2.linear", "img_mlp.net.2")),
     QwenImageEditInt4LinearSpec("txt_mlp.net.0.proj", ("txt_mlp.net.0.proj",)),
     QwenImageEditInt4LinearSpec("txt_mlp.net.2", ("txt_mlp.net.2.linear", "txt_mlp.net.2")),
+)
+
+GROUPED_QKV_BRANCH_SPECS: tuple[GroupedQKVBranchSpec, ...] = (
+    GroupedQKVBranchSpec("attn.to_q", ("attn.to_q", "attn.to_k", "attn.to_v")),
+    GroupedQKVBranchSpec("attn.add_k_proj", ("attn.add_q_proj", "attn.add_k_proj", "attn.add_v_proj")),
 )
 
 AWQ_MODULATION_SUFFIXES = (".img_mod.1", ".txt_mod.1")

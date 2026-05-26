@@ -98,6 +98,80 @@ class TestDeepCompressorInt4Import(unittest.TestCase):
             expected_raw_proj_down = expected_raw_proj_down.to(natural[f"{prefix}.proj_down"].dtype).to(torch.float32)
             self.assertTrue(torch.allclose(natural[f"{prefix}.proj_down"].to(torch.float32), expected_raw_proj_down))
 
+    def test_deepcompressor_import_splits_grouped_qkv_lowrank_branch(self):
+        torch = self.torch
+        from comfy_quants.backends.deepcompressor_import import (
+            build_qwen_image_edit_svdquant_natural_state_dict,
+            load_deepcompressor_ptq_artifacts,
+        )
+        from comfy_quants.formats.int4_common import pack_signed_int4_pairs
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            quant = root / "ptq"
+            quant.mkdir()
+            model, scales, smooth, branch = {}, {}, {}, {}
+            prefixes = [
+                "transformer_blocks.0.attn.to_q",
+                "transformer_blocks.0.attn.to_k",
+                "transformer_blocks.0.attn.to_v",
+            ]
+            n, k, rank = 128, 128, 4
+            expected_dense = []
+            for index, prefix in enumerate(prefixes):
+                dense, _scale = _add_ptq_layer(
+                    torch,
+                    model=model,
+                    scales=scales,
+                    smooth=smooth,
+                    branch=branch,
+                    prefix=prefix,
+                    n=n,
+                    k=k,
+                    rank=rank,
+                    dtype=torch.float16,
+                    offset=index * 3,
+                )
+                expected_dense.append(dense)
+
+            anchor = prefixes[0]
+            smooth[anchor] = torch.linspace(1.0, 2.0, k, dtype=torch.float16)
+            smooth.pop(prefixes[1])
+            smooth.pop(prefixes[2])
+            branch[anchor] = {
+                "a.weight": (torch.arange(rank * k, dtype=torch.float32).view(rank, k) / 1000.0).to(torch.float16),
+                "b.weight": (torch.arange(3 * n * rank, dtype=torch.float32).view(3 * n, rank) / 1000.0).to(torch.float16),
+            }
+            branch.pop(prefixes[1])
+            branch.pop(prefixes[2])
+            torch.save(model, quant / "model.pt")
+            torch.save(scales, quant / "scale.pt")
+            torch.save(smooth, quant / "smooth.pt")
+            torch.save(branch, quant / "branch.pt")
+
+            artifacts = load_deepcompressor_ptq_artifacts(quant)
+            natural, report = build_qwen_image_edit_svdquant_natural_state_dict(artifacts, device="cpu")
+
+            self.assertEqual(report.imported_layer_count, 3)
+            self.assertEqual(report.grouped_qkv_branch_count, 1)
+            self.assertEqual(report.grouped_qkv_branch_anchors, [anchor])
+            self.assertEqual(report.imported_prefixes, prefixes)
+            expected_raw_proj_down = branch[anchor]["a.weight"].transpose(0, 1).to(torch.float32).div(
+                smooth[anchor].to(torch.float32).reshape(-1, 1)
+            )
+            expected_raw_proj_down = expected_raw_proj_down.to(natural[f"{anchor}.proj_down"].dtype).to(torch.float32)
+            expected_proj_up_chunks = branch[anchor]["b.weight"].split((n, n, n), dim=0)
+            for index, prefix in enumerate(prefixes):
+                self.assertTrue(torch.equal(natural[f"{prefix}.weight"], pack_signed_int4_pairs(expected_dense[index])))
+                self.assertTrue(torch.equal(natural[f"{prefix}.smooth_factor"], smooth[anchor]))
+                self.assertTrue(torch.allclose(natural[f"{prefix}.proj_down"].to(torch.float32), expected_raw_proj_down))
+                self.assertTrue(
+                    torch.allclose(
+                        natural[f"{prefix}.proj_up"].to(torch.float32),
+                        expected_proj_up_chunks[index].to(natural[f"{prefix}.proj_up"].dtype).to(torch.float32),
+                    )
+                )
+
     def test_deepcompressor_export_writes_kitchen_tilepacked_checkpoint(self):
         torch = self.torch
         from comfy_quants.backends.deepcompressor_import import write_qwen_image_edit_deepcompressor_svdquant_kitchen_checkpoint
