@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -27,15 +28,16 @@ from comfy_quants.cli.common import local_path, print_json
 def register(subparsers) -> None:
     parser = subparsers.add_parser(
         "qwen-image-edit-2511-int4",
-        aliases=("quantize-qwen-image-edit-2511-int4",),
         help="Run Qwen-Image-Edit-2511 INT4 search/PTQ and export one ComfyUI tile-pack safetensors file",
     )
     parser.add_argument("--out", "-o", required=True, help="Final single-file INT4 tile-pack .safetensors output")
     parser.add_argument(
-        "--base-comfy",
+        "--base-checkpoint",
+        dest="base_comfy",
         default=None,
-        help="BF16/kitchen-native scaffold safetensors used by the default nunchaku-bridge route",
+        help="BF16 scaffold checkpoint used by the default Nunchaku bridge route",
     )
+    parser.add_argument("--base-comfy", dest="base_comfy", help=argparse.SUPPRESS)
     parser.add_argument("--model", "--model-id", dest="model_id", default=DEFAULT_MODEL_ID, help="HF id or local model path")
     parser.add_argument(
         "--deepcompressor-root",

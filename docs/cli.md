@@ -11,15 +11,6 @@ This page owns command syntax only. Workflow selection is documented in
 [`quantization/`](quantization/), and tensor/storage definitions are documented in
 [`formats/`](formats/).
 
-## Environment check
-
-```bash
-comfy-quants doctor --json
-```
-
-Reports package version, available adapters, algorithms, formats, backends, Python
-packages, and GPU detection.
-
 ## Model inspection
 
 ```bash
@@ -62,11 +53,11 @@ See [`quantization/fp8.md`](quantization/fp8.md).
 
 ```bash
 comfy-quants qwen-image-edit-2511-int4 \
-  --model /workspace/models/hf-downloads/Qwen__Qwen-Image-Edit-2511 \
-  --base-comfy /workspace/models/export/qwen_image_edit_2511_bf16_transformer_single/diffusion_pytorch_model.bf16.safetensors \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
   --out runs/qwen-image-edit-2511-int4-tilepack/qwen_edit_2511_quality_r64_128calib_int4_tilepack.safetensors \
-  --deepcompressor-root /workspace/external/deepcompressor-yidhar \
-  --nunchaku-root /workspace/external/nunchaku \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
   --search-strength quality-r64 \
   --calibration-samples 128 \
   --gpus 0 \
@@ -148,19 +139,6 @@ comfy-quants export-int4 \
   --hash-output \
   --json
 ```
-
-## Runtime fixture helpers
-
-```bash
-comfy-quants make-int4-runtime-fixture --help
-comfy-quants make-awq-runtime-fixture --help
-comfy-quants validate-runtime-fixture-output --help
-comfy-quants validate-svdquant-runtime-like-report --help
-comfy-quants validate-int4-runtime-readiness --help
-```
-
-These commands create or validate small fixture artifacts for external runtime checks.
-They are not full-model quantization commands.
 
 ## Generic artifact commands
 

@@ -1,16 +1,17 @@
 # Comfy Quants documentation
 
-This documentation is organized by ownership. Each concept has one canonical page;
-other pages link to it instead of redefining it.
+Comfy Quants exports quantized checkpoints for ComfyUI-compatible loaders. The
+user guides below are organized by what you want to produce: a checkpoint, a
+format reference, or command-line help.
 
-## Structure
+## Start here
 
-| Area | Canonical location | Owns |
-| --- | --- | --- |
-| Project boundary and extension model | [`architecture.md`](architecture.md) | package layout, dependency boundary, extension rules |
-| CLI command reference | [`cli.md`](cli.md) | command names, required flags, common examples |
-| Quantization user flows | [`quantization/`](quantization/) | which command to run for each input/output goal |
-| Artifact storage formats | [`formats/`](formats/) | tensor names, shapes, metadata, packing rules |
+| Goal | Page |
+| --- | --- |
+| Pick a quantization flow | [`quantization/README.md`](quantization/README.md) |
+| Look up command syntax | [`cli.md`](cli.md) |
+| Understand repository architecture | [`architecture.md`](architecture.md) |
+| Check tensor/storage formats | [`formats/`](formats/) |
 
 ## Quantization guides
 
@@ -25,8 +26,8 @@ other pages link to it instead of redefining it.
 - [`formats/svdquant_w4a4_kitchen_tilepack.md`](formats/svdquant_w4a4_kitchen_tilepack.md) — SVDQuant W4A4 kitchen tile-pack tensor contract.
 - [`formats/awq_w4a16.md`](formats/awq_w4a16.md) — AWQ W4A16 modulation tensor contract.
 
-## Public package boundary
+## ComfyUI integration model
 
-`comfy_quants` produces ComfyUI-loadable artifacts. It does not import, vendor,
-embed, launch, or configure ComfyUI. External quantization or conversion tools are
-used only through explicit command-line/subprocess boundaries.
+Run quantization with this package, then load the exported artifact with a
+compatible ComfyUI setup. Downstream custom-node projects can depend on
+`comfy-quants` and call its CLI or Python API when they need an in-UI workflow.

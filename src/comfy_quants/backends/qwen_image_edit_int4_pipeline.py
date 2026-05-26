@@ -241,7 +241,7 @@ class ResolvedQwenImageEditInt4PipelineConfig:
         if self.awq_group_size <= 0:
             raise ConfigurationError("--awq-group-size must be a positive integer")
         if self.route == "nunchaku-bridge" and self.base_comfy is None:
-            raise ConfigurationError("--base-comfy is required for the nunchaku-bridge route")
+            raise ConfigurationError("--base-checkpoint is required for the nunchaku-bridge route")
         if static_only:
             return
         if self.run_ptq or self.route == "nunchaku-bridge":
@@ -268,13 +268,14 @@ class ResolvedQwenImageEditInt4PipelineConfig:
             _require_file(self.nunchaku_root / "nunchaku/merge_safetensors.py", "Nunchaku merge_safetensors module")
             _require_dir(self.nunchaku_root / "tools/kitchen_native", "Nunchaku kitchen-native helper directory")
             assert self.base_comfy is not None
-            _require_file(self.base_comfy, "base ComfyUI/kitchen-native scaffold")
+            _require_file(self.base_comfy, "base BF16 scaffold checkpoint")
 
     def to_public_dict(self) -> dict[str, Any]:
         data = asdict(self)
         for key, value in list(data.items()):
             if isinstance(value, Path):
                 data[key] = str(value)
+        data["base_checkpoint"] = data.pop("base_comfy")
         data["run_ptq"] = self.run_ptq
         data["split_dir"] = str(self.split_dir)
         data["ptq_override_path"] = str(self.ptq_override_path)

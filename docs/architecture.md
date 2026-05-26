@@ -1,29 +1,38 @@
 # Architecture
 
-Comfy Quants is a CLI-first and library-first quantization package for producing
-ComfyUI-loadable `.safetensors` artifacts. The package owns artifact contracts and
-writers; it does not own a ComfyUI runtime integration.
+Comfy Quants is organized around offline quantization and artifact export. The
+package contains the model contracts, quantization logic, storage formats, and
+writers needed to produce ComfyUI-loadable `.safetensors` checkpoints.
 
-## Package boundary
+## Design goals
 
-`comfy_quants` may:
+- produce single-file artifacts that compatible ComfyUI loaders can consume;
+- keep command-line usage stable for repeatable local quantization jobs;
+- keep model contracts, format contracts, and writer logic easy to review;
+- make new model families and quantization formats additive rather than monolithic;
+- allow downstream custom-node projects to reuse the same export logic.
 
-- read local model checkpoints;
-- apply quantization or import already-quantized tensors;
-- write single-file `.safetensors` artifacts;
-- validate static tensor structure;
-- call explicitly configured external tools by subprocess.
+## Integration model
 
-`comfy_quants` must not:
+`comfy_quants` is used before inference: it reads local source weights, applies a
+quantization or import flow, writes the target checkpoint, and emits validation
+reports. ComfyUI is then used separately to load the produced checkpoint and run
+sampling/image validation.
 
-- import, vendor, embed, launch, or configure ComfyUI;
-- use ComfyUI as a hidden model parser;
-- require a ComfyUI checkout for normal package operation;
-- declare DeepCompressor, Nunchaku, or comfy-kitchen as Python package dependencies;
-- place ComfyUI custom-node or UI code in this base package.
+Custom nodes, UI panels, and workflow templates should live in downstream adapter
+projects. Those projects can depend on `comfy-quants` and call the CLI or Python
+API while keeping their ComfyUI-specific code outside this base library.
 
-A ComfyUI custom node should live in a separate adapter package and call this package
-as a library or CLI.
+## Dependency policy
+
+Normal package operation does not require a ComfyUI checkout. The package keeps
+its supported model and artifact contracts in `model_adapters/` and `formats/`, so
+exports are reproducible without asking a runtime to parse model structure for it.
+
+Some flows can coordinate external toolchains such as DeepCompressor, Nunchaku,
+or comfy-kitchen. Those tools are configured explicitly by path and invoked at the
+command boundary; they are not installed as unconditional Python dependencies of
+`comfy-quants`.
 
 ## Source layout
 
@@ -44,12 +53,12 @@ src/comfy_quants/
 
 ## Ownership rules
 
-| Code area | Responsibility | Must not own |
+| Code area | Responsibility | Keep separate |
 | --- | --- | --- |
 | `model_adapters/` | model-family tensor names, shape contracts, layer selection | storage packing algorithms |
 | `formats/` | reusable tensor/storage format contracts and packing helpers | model-family policy |
-| `algorithms/` | quantization procedures and solver logic | UI or external runtime integration |
-| `backends/` | file IO, import bridges, export pipelines | hidden dependencies on ComfyUI |
+| `algorithms/` | quantization procedures and solver logic | UI and workflow integration |
+| `backends/` | file IO, import bridges, export pipelines | runtime-specific UI code |
 | `cli/` | stable command surface | format-specific business logic that belongs in formats/backends |
 
 ## Adding a model family
@@ -78,4 +87,4 @@ src/comfy_quants/
 - User workflows belong in [`quantization/`](quantization/).
 - Command syntax belongs in [`cli.md`](cli.md).
 - Tensor layout definitions belong in [`formats/`](formats/).
-- Package layout and dependency rules belong in this page.
+- Package layout and extension rules belong in this page.

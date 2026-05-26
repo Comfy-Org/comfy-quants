@@ -1,6 +1,8 @@
-"""doctor command."""
+"""Diagnostic command."""
 
 from __future__ import annotations
+
+import argparse
 
 from comfy_quants.algorithms.registry import list_algorithms
 from comfy_quants.cli.common import print_json
@@ -12,7 +14,7 @@ from comfy_quants.utils.system_info import collect_system_info
 
 
 def register(subparsers):
-    parser = subparsers.add_parser("doctor", help="Inspect local Comfy Quants environment")
+    parser = subparsers.add_parser("doctor", help=argparse.SUPPRESS)
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
     parser.set_defaults(func=run)
 

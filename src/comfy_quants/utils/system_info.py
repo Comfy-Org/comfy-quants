@@ -1,4 +1,4 @@
-"""System and hardware discovery used by the doctor command and manifests."""
+"""System and hardware discovery used by diagnostics and manifests."""
 
 from __future__ import annotations
 

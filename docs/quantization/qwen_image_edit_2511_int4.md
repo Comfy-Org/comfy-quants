@@ -12,7 +12,7 @@ DeepCompressor and Nunchaku are not Python dependencies of this package.
 | Input | Argument | Default |
 | --- | --- | --- |
 | Qwen-Image-Edit-2511 model directory | `--model` | required when PTQ is run |
-| BF16 transformer scaffold checkpoint | `--base-comfy` | required for the default bridge route |
+| BF16 transformer scaffold checkpoint | `--base-checkpoint` | required for the default bridge route |
 | DeepCompressor checkout | `--deepcompressor-root` | required unless `--quant-path` is supplied |
 | Nunchaku checkout | `--nunchaku-root` | required for the default bridge route |
 | Calibration set | `--calibration-path` | `<deepcompressor-root>/datasets/torch.bfloat16/qwen-image-edit-2511/fmeuler50-g4.0/qdiff/s128` |
@@ -38,11 +38,11 @@ model directory
 
 ```bash
 comfy-quants qwen-image-edit-2511-int4 \
-  --model /workspace/models/hf-downloads/Qwen__Qwen-Image-Edit-2511 \
-  --base-comfy /workspace/models/export/qwen_image_edit_2511_bf16_transformer_single/diffusion_pytorch_model.bf16.safetensors \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
   --out /tmp/qwen_edit_2511_int4_tilepack.safetensors \
-  --deepcompressor-root /workspace/external/deepcompressor-yidhar \
-  --nunchaku-root /workspace/external/nunchaku \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
   --search-strength quality-r64 \
   --calibration-samples 128 \
   --gpus 0 \
@@ -54,11 +54,11 @@ comfy-quants qwen-image-edit-2511-int4 \
 
 ```bash
 comfy-quants qwen-image-edit-2511-int4 \
-  --model /workspace/models/hf-downloads/Qwen__Qwen-Image-Edit-2511 \
-  --base-comfy /workspace/models/export/qwen_image_edit_2511_bf16_transformer_single/diffusion_pytorch_model.bf16.safetensors \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
   --out runs/qwen-image-edit-2511-int4-tilepack/qwen_edit_2511_quality_r64_128calib_int4_tilepack.safetensors \
-  --deepcompressor-root /workspace/external/deepcompressor-yidhar \
-  --nunchaku-root /workspace/external/nunchaku \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
   --search-strength quality-r64 \
   --calibration-samples 128 \
   --gpus 0 \
@@ -70,11 +70,11 @@ Use a custom calibration set by passing `--calibration-path`:
 
 ```bash
 comfy-quants qwen-image-edit-2511-int4 \
-  --model /workspace/models/hf-downloads/Qwen__Qwen-Image-Edit-2511 \
-  --base-comfy /workspace/models/export/qwen_image_edit_2511_bf16_transformer_single/diffusion_pytorch_model.bf16.safetensors \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
   --out runs/qwen-edit-2511/qwen_edit_2511_custom_calib_int4_tilepack.safetensors \
-  --deepcompressor-root /workspace/external/deepcompressor-yidhar \
-  --nunchaku-root /workspace/external/nunchaku \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
   --calibration-path /absolute/path/to/qdiff/s128 \
   --calibration-samples 128 \
   --search-strength quality-r64 \
