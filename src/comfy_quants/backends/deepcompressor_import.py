@@ -18,9 +18,12 @@ from comfy_quants.formats.svdquant_w4a4 import (
     svdquant_w4a4_checkpoint_quant_config,
 )
 from comfy_quants.model_adapters.qwen_image_edit_int4 import (
+    GROUPED_QKV_BRANCH_SPECS,
+    GroupedQKVBranchSpec,
     QwenImageEditInt4LinearSpec,
     is_act_unsigned_prefix,
     iter_svdquant_linear_mappings,
+    transformer_block_prefixes,
 )
 
 
@@ -99,6 +102,9 @@ class DeepCompressorSVDQuantImportReport:
     proj_down_smooth_folded: bool = True
     shift_bias_correction_count: int = 0
     shift_bias_corrected_prefixes: list[str] = field(default_factory=list)
+    grouped_qkv_branch_count: int = 0
+    grouped_qkv_branch_anchors: list[str] = field(default_factory=list)
+    grouped_qkv_split_prefixes: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -430,6 +436,108 @@ def _block_prefix(output_prefix: str, spec: QwenImageEditInt4LinearSpec) -> str:
     return output_prefix[: -len(suffix)]
 
 
+def _linear_out_in_features(weight: Any, *, prefix: str) -> tuple[int, int]:
+    tensor = _to_tensor(weight, name=f"{prefix}.weight")
+    if int(tensor.ndim) > 2:
+        if int(tensor.numel()) != int(tensor.shape[0]) * int(tensor.shape[1]):
+            raise PayloadWriteError(f"{prefix}: only pointwise-conv-compatible rank > 2 weights can be flattened")
+        return int(tensor.shape[0]), int(tensor.shape[1])
+    if int(tensor.ndim) != 2:
+        raise PayloadWriteError(f"{prefix}: expected rank-2 weight, got {tuple(tensor.shape)}")
+    return int(tensor.shape[0]), int(tensor.shape[1])
+
+
+def _branch_down_rank(branch: Any, *, in_features: int, prefix: str) -> int:
+    if not isinstance(branch, Mapping):
+        raise PayloadWriteError(f"{prefix}: expected low-rank branch dict with a.weight and b.weight")
+    if "a.weight" not in branch or "b.weight" not in branch:
+        raise PayloadWriteError(f"{prefix}: low-rank branch is missing a.weight or b.weight")
+    down_raw = _to_tensor(branch["a.weight"], name=f"{prefix}.branch.a.weight")
+    if int(down_raw.ndim) != 2:
+        raise PayloadWriteError(f"{prefix}: branch a.weight must be rank 2, got {tuple(down_raw.shape)}")
+    if int(down_raw.shape[1]) == in_features:
+        return int(down_raw.shape[0])
+    if int(down_raw.shape[0]) == in_features:
+        return int(down_raw.shape[1])
+    raise PayloadWriteError(f"{prefix}: branch a.weight shape {tuple(down_raw.shape)} is incompatible with K={in_features}")
+
+
+def _split_grouped_qkv_branch(
+    branch: Any,
+    *,
+    split_sizes: tuple[int, int, int],
+    in_features: int,
+    prefix: str,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]] | None:
+    """Return per-target branches when one branch spans concatenated Q/K/V rows."""
+    rank = _branch_down_rank(branch, in_features=in_features, prefix=prefix)
+    up_raw = _to_tensor(branch["b.weight"], name=f"{prefix}.branch.b.weight")
+    if int(up_raw.ndim) != 2:
+        raise PayloadWriteError(f"{prefix}: branch b.weight must be rank 2, got {tuple(up_raw.shape)}")
+
+    total_out = sum(split_sizes)
+    if int(up_raw.shape[0]) == total_out and int(up_raw.shape[1]) == rank:
+        chunks = up_raw.split(split_sizes, dim=0)
+    elif int(up_raw.shape[1]) == total_out and int(up_raw.shape[0]) == rank:
+        chunks = up_raw.split(split_sizes, dim=1)
+    elif int(up_raw.shape[0]) == total_out or int(up_raw.shape[1]) == total_out:
+        raise PayloadWriteError(
+            f"{prefix}: grouped branch b.weight shape {tuple(up_raw.shape)} does not align with rank={rank}"
+        )
+    else:
+        return None
+
+    return tuple({"a.weight": branch["a.weight"], "b.weight": chunk.contiguous()} for chunk in chunks)  # type: ignore[return-value]
+
+
+def _try_grouped_qkv_branch_targets(
+    *,
+    artifacts: DeepCompressorPTQArtifacts,
+    block_prefix: str,
+    group: GroupedQKVBranchSpec,
+    mapping_by_output: Mapping[str, tuple[str, QwenImageEditInt4LinearSpec]],
+) -> tuple[list[tuple[str, str, QwenImageEditInt4LinearSpec, dict[str, Any]]], str] | None:
+    anchor_prefix = f"{block_prefix}.{group.anchor_suffix}"
+    branch = artifacts.branch.get(anchor_prefix)
+    if branch is None:
+        return None
+
+    target_rows: list[int] = []
+    in_features: int | None = None
+    target_entries: list[tuple[str, str, QwenImageEditInt4LinearSpec]] = []
+    for suffix in group.target_suffixes:
+        output_prefix = f"{block_prefix}.{suffix}"
+        entry = mapping_by_output.get(output_prefix)
+        if entry is None:
+            return None
+        source_prefix, spec = entry
+        if f"{source_prefix}.weight.scale.0" not in artifacts.scales:
+            return None
+        out_features, target_in_features = _linear_out_in_features(artifacts.model[f"{source_prefix}.weight"], prefix=source_prefix)
+        if in_features is None:
+            in_features = target_in_features
+        elif target_in_features != in_features:
+            raise PayloadWriteError(
+                f"{anchor_prefix}: grouped QKV targets have mismatched input dimensions "
+                f"({in_features} vs {target_in_features})"
+            )
+        target_rows.append(out_features)
+        target_entries.append((output_prefix, source_prefix, spec))
+
+    split_branches = _split_grouped_qkv_branch(
+        branch,
+        split_sizes=(target_rows[0], target_rows[1], target_rows[2]),
+        in_features=int(in_features),
+        prefix=anchor_prefix,
+    )
+    if split_branches is None:
+        return None
+    return [
+        (output_prefix, source_prefix, spec, split_branch)
+        for (output_prefix, source_prefix, spec), split_branch in zip(target_entries, split_branches, strict=True)
+    ], anchor_prefix
+
+
 def build_qwen_image_edit_svdquant_natural_state_dict(
     artifacts: DeepCompressorPTQArtifacts,
     *,
@@ -452,9 +560,13 @@ def build_qwen_image_edit_svdquant_natural_state_dict(
             copied += 1
 
     mappings = iter_svdquant_linear_mappings(artifacts.model.keys())
+    mapping_by_output = {output_prefix: (source_prefix, spec) for output_prefix, source_prefix, spec in mappings}
     imported_prefixes: list[str] = []
     skipped_no_scale: list[str] = []
     shift_bias_corrected_prefixes: list[str] = []
+    handled_grouped_prefixes: set[str] = set()
+    grouped_qkv_branch_anchors: list[str] = []
+    grouped_qkv_split_prefixes: list[str] = []
 
     _emit_progress(
         progress,
@@ -465,7 +577,67 @@ def build_qwen_image_edit_svdquant_natural_state_dict(
         execution_device=str(execution_device),
     )
 
+    for block_prefix in transformer_block_prefixes(artifacts.model.keys()):
+        for group in GROUPED_QKV_BRANCH_SPECS:
+            grouped = _try_grouped_qkv_branch_targets(
+                artifacts=artifacts,
+                block_prefix=block_prefix,
+                group=group,
+                mapping_by_output=mapping_by_output,
+            )
+            if grouped is None:
+                continue
+            grouped_targets, anchor_prefix = grouped
+            smooth = artifacts.smooth.get(anchor_prefix)
+            grouped_qkv_branch_anchors.append(anchor_prefix)
+            for output_prefix, source_prefix, _spec, split_branch in grouped_targets:
+                scale = artifacts.scales[f"{source_prefix}.weight.scale.0"]
+                subscale = artifacts.scales.get(f"{source_prefix}.weight.scale.1")
+                _emit_progress(
+                    progress,
+                    stage="deepcompressor_import_grouped_qkv_layer",
+                    prefix=output_prefix,
+                    source_prefix=source_prefix,
+                    grouped_branch_anchor=anchor_prefix,
+                    layer_index=len(imported_prefixes) + 1,
+                    layer_count=len(mappings),
+                    execution_device=str(execution_device),
+                )
+                shift = _lookup_shift(artifacts.model, source_prefix=source_prefix, output_prefix=output_prefix)
+                params = deepcompressor_linear_to_natural_svdquant_params(
+                    prefix=output_prefix,
+                    weight=artifacts.model[f"{source_prefix}.weight"],
+                    scale=scale,
+                    smooth=smooth,
+                    branch=split_branch,
+                    bias=artifacts.model.get(f"{source_prefix}.bias"),
+                    shift=shift,
+                    subscale=subscale,
+                    device=str(execution_device),
+                )
+                if shift is not None:
+                    shift_bias_corrected_prefixes.append(output_prefix)
+                params["comfy_quant"] = encode_quant_config_tensor(
+                    svdquant_w4a4_checkpoint_quant_config(
+                        act_unsigned=is_act_unsigned_prefix(output_prefix),
+                        lowrank_branch_input_basis=LOWRANK_BRANCH_INPUT_BASIS_RAW,
+                        proj_down_smooth_folded=True,
+                    )
+                )
+
+                _drop_prefix_tensors(output, source_prefix)
+                _drop_prefix_tensors(output, output_prefix)
+                for key, tensor in params.items():
+                    output[f"{output_prefix}.{key}"] = tensor.detach().cpu().contiguous()
+                imported_prefixes.append(output_prefix)
+                grouped_qkv_split_prefixes.append(output_prefix)
+                handled_grouped_prefixes.add(output_prefix)
+                if execution_device.type == "cuda":
+                    torch.cuda.empty_cache()
+
     for index, (output_prefix, source_prefix, spec) in enumerate(mappings, start=1):
+        if output_prefix in handled_grouped_prefixes:
+            continue
         scale_key = f"{source_prefix}.weight.scale.0"
         scale = artifacts.scales.get(scale_key)
         if scale is None:
@@ -550,6 +722,9 @@ def build_qwen_image_edit_svdquant_natural_state_dict(
         cuda_max_memory_reserved_bytes=cuda_peak_reserved,
         shift_bias_correction_count=len(shift_bias_corrected_prefixes),
         shift_bias_corrected_prefixes=shift_bias_corrected_prefixes,
+        grouped_qkv_branch_count=len(grouped_qkv_branch_anchors),
+        grouped_qkv_branch_anchors=grouped_qkv_branch_anchors,
+        grouped_qkv_split_prefixes=grouped_qkv_split_prefixes,
     )
     return output, report
 

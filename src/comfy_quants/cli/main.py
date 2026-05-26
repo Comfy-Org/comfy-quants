@@ -12,9 +12,11 @@ from comfy_quants.cli import (
     commands_export_int4,
     commands_export_model,
     commands_inspect,
+    commands_inspect_int4,
     commands_jobs,
     commands_quantize,
     commands_quantize_int4,
+    commands_qwen_image_edit_int4,
     commands_runtime_fixture,
     commands_validate,
 )
@@ -27,9 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="command", required=True)
     commands_doctor.register(subparsers)
     commands_inspect.register(subparsers)
+    commands_inspect_int4.register(subparsers)
     commands_calib.register(subparsers)
     commands_quantize.register(subparsers)
     commands_quantize_int4.register(subparsers)
+    commands_qwen_image_edit_int4.register(subparsers)
     commands_runtime_fixture.register(subparsers)
     commands_validate.register(subparsers)
     commands_export.register(subparsers)
