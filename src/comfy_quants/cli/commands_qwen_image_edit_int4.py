@@ -33,21 +33,22 @@ def register(subparsers) -> None:
     parser.add_argument("--out", "-o", required=True, help="Final single-file INT4 tile-pack .safetensors output")
     parser.add_argument(
         "--base-checkpoint",
-        dest="base_comfy",
+        dest="base_checkpoint",
+        metavar="BASE_CHECKPOINT",
         default=None,
-        help="BF16 scaffold checkpoint used by the default Nunchaku bridge route",
+        help="BF16 transformer checkpoint used to assemble the final tile-pack artifact",
     )
-    parser.add_argument("--base-comfy", dest="base_comfy", help=argparse.SUPPRESS)
+    parser.add_argument("--base-comfy", dest="base_checkpoint", help=argparse.SUPPRESS)
     parser.add_argument("--model", "--model-id", dest="model_id", default=DEFAULT_MODEL_ID, help="HF id or local model path")
     parser.add_argument(
         "--deepcompressor-root",
         default=str(DEFAULT_DEEPCOMPRESSOR_ROOT),
-        help="External DeepCompressor checkout used by subprocess commands",
+        help="Local DeepCompressor checkout",
     )
     parser.add_argument(
         "--nunchaku-root",
         default=str(DEFAULT_NUNCHAKU_ROOT),
-        help="External Nunchaku checkout with tools/kitchen_native helpers",
+        help="Local Nunchaku checkout with tools/kitchen_native helpers",
     )
     parser.add_argument(
         "--search-strength",
@@ -55,7 +56,7 @@ def register(subparsers) -> None:
         dest="search_strength",
         default=DEFAULT_SEARCH_STRENGTH,
         choices=SEARCH_STRENGTHS,
-        help="DeepCompressor search preset. Default is the verified quality-r64 preset.",
+        help="Search preset. Default: quality-r64.",
     )
     parser.add_argument(
         "--calibration-path",
@@ -71,11 +72,11 @@ def register(subparsers) -> None:
         "--calibration-samples",
         type=int,
         default=DEFAULT_CALIBRATION_SAMPLES,
-        help="Number of calibration samples used by the search/PTQ overlay. Default: 128.",
+        help="Number of calibration samples used by search/PTQ. Default: 128.",
     )
     parser.add_argument("--gpus", default=DEFAULT_GPUS, help="CUDA_VISIBLE_DEVICES for DeepCompressor PTQ. Default: 0")
-    parser.add_argument("--python-bin", default="python", help="Python executable used for external subprocesses")
-    parser.add_argument("--micromamba-env", default=None, help="Optional micromamba prefix for external subprocesses")
+    parser.add_argument("--python-bin", default="python", help="Python executable used for external tools")
+    parser.add_argument("--micromamba-env", default=None, help="Optional micromamba prefix for external tools")
     parser.add_argument("--runs-root", default=None, help="DeepCompressor runs root used to locate the produced PTQ model")
     parser.add_argument("--export-root", default=None, help="Intermediate split/raw export directory")
     parser.add_argument("--export-name", default=None, help="Intermediate Nunchaku split checkpoint directory name")
@@ -98,7 +99,7 @@ def register(subparsers) -> None:
     parser.add_argument("--no-inspect", action="store_true", help="Skip strict structural inspection after writing the artifact")
     parser.add_argument("--no-strict-inspect", action="store_true", help="Run inspection without the Qwen-Image-Edit-2511 strict counts")
     parser.add_argument("--report", default=None, help="Pipeline report JSON path. Default: <out>.pipeline_report.json")
-    parser.add_argument("--dry-run", action="store_true", help="Write/print the resolved plan without executing external tools")
+    parser.add_argument("--dry-run", action="store_true", help="Print the resolved plan without running the export")
     parser.add_argument("--json", action="store_true", help="Print JSON result")
     parser.set_defaults(func=run)
 
@@ -106,7 +107,7 @@ def register(subparsers) -> None:
 def _config_from_args(args) -> QwenImageEditInt4PipelineConfig:
     return QwenImageEditInt4PipelineConfig(
         output=local_path(args.out),
-        base_comfy=local_path(args.base_comfy) if args.base_comfy else None,
+        base_checkpoint=local_path(args.base_checkpoint) if args.base_checkpoint else None,
         model_id=args.model_id,
         deepcompressor_root=local_path(args.deepcompressor_root),
         nunchaku_root=local_path(args.nunchaku_root),

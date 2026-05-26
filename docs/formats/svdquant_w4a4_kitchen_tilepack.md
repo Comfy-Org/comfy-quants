@@ -82,10 +82,9 @@ The fixed `weight` tile tail is:
 (128 / 4, 4 * 64 / 2) = (32, 128)
 ```
 
-## Model-adapter boundary
+## How model adapters use this format
 
-This format does not decide which model layers use SVDQuant. For Qwen-Image-Edit
-INT4 bundles, the model adapter maps attention and MLP linear layers to
-SVDQuant W4A4, while other layer families may stay high precision or use another
-format such as AWQ W4A16. QKV splitting and Qwen-specific naming are adapter or
-backend-bridge responsibilities, not reusable format responsibilities.
+For Qwen-Image-Edit INT4 bundles, the model adapter maps attention and MLP
+linear layers to SVDQuant W4A4. Other layer families may stay high precision or
+use another format such as AWQ W4A16. QKV splitting and Qwen-specific tensor
+names are handled by the model adapter or export bridge.

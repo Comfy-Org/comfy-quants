@@ -385,7 +385,7 @@ def inspect_svdquant_w4a4_artifact(
 ) -> Int4ArtifactInspectionReport:
     """Inspect a single exported INT4 safetensors artifact.
 
-    ``strict_qwen_image_edit_2511`` applies the known production contract for a
+    ``strict_qwen_image_edit_2511`` applies the known artifact contract for a
     60-block Qwen-Image-Edit-2511 SVDQuant W4A4 tile-packed checkpoint:
     720 SVDQuant linears and 120 split QKV low-rank branch groups.
     """

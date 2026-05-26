@@ -1,10 +1,11 @@
-# Native INT4 solver
+# Built-in INT4 solver
 
-`quantize-int4` runs the package-native Qwen-Image-Edit INT4 solver from a dense
+`quantize-int4` runs the built-in Qwen-Image-Edit INT4 solver from a dense
 transformer checkpoint and writes a `svdquant_w4a4` tile-pack artifact.
 
-Use this entrypoint for algorithm development or advanced workflows. For the
-Qwen-Image-Edit-2511 DeepCompressor/Nunchaku flow, use
+Use this entrypoint when you are developing or evaluating the built-in solver.
+For the ready-to-run Qwen-Image-Edit-2511 flow that uses DeepCompressor search/PTQ
+and Nunchaku conversion, use
 [`qwen_image_edit_2511_int4.md`](qwen_image_edit_2511_int4.md).
 
 ## Inputs
@@ -26,7 +27,7 @@ Qwen-Image-Edit-2511 DeepCompressor/Nunchaku flow, use
 | --- | --- | --- |
 | `weight_only_initialization` | none | Initializes SVDQuant tensors from weights without calibration. |
 | `calibrated_svdquant` | `--activation-stats` | Applies activation-stat smoothing and residual-SVD branch initialization. |
-| `svdquant_gptq_experimental` | `--activation-stats`, `--gptq-hessian-stats` | Adds the package-native GPTQ solve. |
+| `svdquant_gptq_experimental` | `--activation-stats`, `--gptq-hessian-stats` | Adds the built-in GPTQ solve. |
 
 ## Basic export
 
@@ -34,7 +35,7 @@ Qwen-Image-Edit-2511 DeepCompressor/Nunchaku flow, use
 comfy-quants quantize-int4 \
   --family qwen_image_edit \
   --format svdquant_w4a4 \
-  --source /absolute/path/to/diffusion_pytorch_model.safetensors \
+  --source /path/to/diffusion_pytorch_model.safetensors \
   --out runs/qwen-edit-2511/int4-svdquant-w4a4 \
   --rank 64 \
   --device cuda:0 \
@@ -55,8 +56,8 @@ quantization_report.json
 comfy-quants quantize-int4 \
   --family qwen_image_edit \
   --format svdquant_w4a4 \
-  --source /absolute/path/to/diffusion_pytorch_model.safetensors \
-  --activation-stats /absolute/path/to/int4_activation_stats.json \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --activation-stats /path/to/int4_activation_stats.json \
   --quantization-mode calibrated_svdquant \
   --out runs/qwen-edit-2511/int4-svdquant-w4a4-calibrated \
   --rank 64 \
@@ -71,9 +72,9 @@ comfy-quants quantize-int4 \
 comfy-quants quantize-int4 \
   --family qwen_image_edit \
   --format svdquant_w4a4 \
-  --source /absolute/path/to/diffusion_pytorch_model.safetensors \
-  --activation-stats /absolute/path/to/int4_activation_stats.json \
-  --gptq-hessian-stats /absolute/path/to/int4_gptq_hessian_stats.json \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --activation-stats /path/to/int4_activation_stats.json \
+  --gptq-hessian-stats /path/to/int4_gptq_hessian_stats.json \
   --quantization-mode svdquant_gptq_experimental \
   --out runs/qwen-edit-2511/int4-svdquant-w4a4-gptq \
   --rank 64 \
@@ -82,10 +83,11 @@ comfy-quants quantize-int4 \
   --json
 ```
 
-## Calibration reducer commands
+## Calibration helper commands
 
-`comfy_quants` can build capture manifests and reduce captured activation tensors.
-The actual model forward pass is supplied by the user's runtime environment.
+These helpers create capture manifests and reduce captured activation or Hessian
+statistics. They are useful when building calibration data for the built-in
+solver.
 
 ```bash
 comfy-quants calib plan-int4-capture --help

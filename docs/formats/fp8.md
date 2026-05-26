@@ -10,7 +10,7 @@ User commands are documented in [`../quantization/fp8.md`](../quantization/fp8.m
 | `fp8_e4m3` | `torch.float8_e4m3fn` | `F8_E4M3` | `float8_e4m3fn` |
 | `fp8_e5m2` | `torch.float8_e5m2` | `F8_E5M2` | `float8_e5m2` |
 
-`fp8_e5m2` is not `mxfp8` and is not `fp8_e4m3fn_fast`.
+This page covers the `fp8_e4m3` and `fp8_e5m2` checkpoint identifiers. MXFP8 and fast E4M3 variants should use separate identifiers if they are added later.
 
 ## Layer side tensors
 

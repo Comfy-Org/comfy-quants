@@ -1,38 +1,36 @@
 # Architecture
 
-Comfy Quants is organized around offline quantization and artifact export. The
-package contains the model contracts, quantization logic, storage formats, and
-writers needed to produce ComfyUI-loadable `.safetensors` checkpoints.
+Comfy Quants is an offline quantization and checkpoint export library. It reads
+local model weights, runs a selected quantization flow, and writes
+ComfyUI-loadable `.safetensors` artifacts.
 
 ## Design goals
 
-- produce single-file artifacts that compatible ComfyUI loaders can consume;
-- keep command-line usage stable for repeatable local quantization jobs;
-- keep model contracts, format contracts, and writer logic easy to review;
-- make new model families and quantization formats additive rather than monolithic;
-- allow downstream custom-node projects to reuse the same export logic.
+- produce single-file artifacts for compatible ComfyUI loaders;
+- keep CLI runs repeatable and easy to inspect;
+- keep model contracts, format contracts, and writers in separate modules;
+- add new model families and quantization formats without a central monolithic file;
+- let downstream custom-node projects reuse the same export logic.
 
-## Integration model
+## How it works with ComfyUI
 
-`comfy_quants` is used before inference: it reads local source weights, applies a
-quantization or import flow, writes the target checkpoint, and emits validation
-reports. ComfyUI is then used separately to load the produced checkpoint and run
-sampling/image validation.
+The normal workflow is artifact-first:
 
-Custom nodes, UI panels, and workflow templates should live in downstream adapter
-projects. Those projects can depend on `comfy-quants` and call the CLI or Python
-API while keeping their ComfyUI-specific code outside this base library.
+1. run `comfy-quants` outside ComfyUI;
+2. write the target `.safetensors` checkpoint;
+3. copy or symlink that checkpoint to the model location used by the loader;
+4. load the checkpoint in ComfyUI and run inference validation.
 
-## Dependency policy
+ComfyUI custom nodes can depend on this package when they want an in-UI
+quantization workflow. The UI code stays in the custom-node project, while the
+quantization/export logic stays here.
 
-Normal package operation does not require a ComfyUI checkout. The package keeps
-its supported model and artifact contracts in `model_adapters/` and `formats/`, so
-exports are reproducible without asking a runtime to parse model structure for it.
+## External toolchains
 
-Some flows can coordinate external toolchains such as DeepCompressor, Nunchaku,
-or comfy-kitchen. Those tools are configured explicitly by path and invoked at the
-command boundary; they are not installed as unconditional Python dependencies of
-`comfy-quants`.
+Some flows use established quantization or conversion projects. For example, the
+Qwen-Image-Edit-2511 INT4 guide asks for local DeepCompressor and Nunchaku paths.
+Those paths are provided explicitly in the CLI command, and the final artifact is
+still written and inspected by `comfy-quants`.
 
 ## Source layout
 
@@ -41,50 +39,43 @@ src/comfy_quants/
 ├── cli/              # command entrypoints and argument parsing
 ├── sdk/              # Python API surface
 ├── core/             # schemas and domain objects
-├── model_adapters/   # model-family tensor contracts and selection policies
+├── model_adapters/   # model-family tensor contracts and layer selection rules
 ├── algorithms/       # quantization procedures and planners
 ├── formats/          # reusable storage formats and packing helpers
 ├── backends/         # safetensors writers, importers, and export pipelines
 ├── calibration/      # calibration manifests and reducers
-├── registry/         # adapters, formats, algorithms, and backends registry
+├── registry/         # adapters, formats, algorithms, and backend registration
 ├── validation/       # artifact reports and checks
 └── utils/            # JSON, hashing, and system helpers
 ```
 
-## Ownership rules
+## Extension map
 
-| Code area | Responsibility | Keep separate |
+| Area | Add here when... | Keep out of this area |
 | --- | --- | --- |
-| `model_adapters/` | model-family tensor names, shape contracts, layer selection | storage packing algorithms |
-| `formats/` | reusable tensor/storage format contracts and packing helpers | model-family policy |
-| `algorithms/` | quantization procedures and solver logic | UI and workflow integration |
-| `backends/` | file IO, import bridges, export pipelines | runtime-specific UI code |
-| `cli/` | stable command surface | format-specific business logic that belongs in formats/backends |
+| `model_adapters/` | a model family needs tensor names, shape rules, or layer selection | storage packing code |
+| `formats/` | a storage layout needs identifiers, tensor families, metadata, or pack/unpack helpers | model-family policy |
+| `algorithms/` | a solver, quantizer, planner, or calibration algorithm is added | UI and workflow integration |
+| `backends/` | a file writer, importer, bridge, or end-to-end export pipeline is added | generic tensor math that belongs in `algorithms/` or `formats/` |
+| `cli/` | a stable user command is added | format internals or model-specific business logic |
 
 ## Adding a model family
 
-1. Add the static model contract under `model_adapters/`.
-2. Add tests that verify expected tensor names and shapes.
+1. Add the model contract under `model_adapters/`.
+2. Add tests for expected tensor names, shapes, and layer selection.
 3. Reuse existing formats when possible.
-4. Add only model-family-specific mapping in the adapter or backend bridge.
+4. Put only model-specific mapping in the adapter or backend bridge.
 
 ## Adding a quantization format
 
 1. Add a format module under `formats/`.
-2. Define the format identifier, tensor family, metadata JSON, shapes, and packing rules.
+2. Define the format id, tensor family, metadata JSON, shapes, and packing rules.
 3. Add writer/reader tests for the format.
-4. Keep model selection outside the format module.
+4. Keep model-family selection in `model_adapters/`.
 
-## Adding a quantization flow
+## Adding an export flow
 
-1. Add solver or planner logic under `algorithms/` or a dedicated backend pipeline.
-2. Add a CLI command or extend an existing command only at the boundary.
-3. Write reports that can be consumed by tests and CI.
-4. Link user-facing instructions from `docs/quantization/`.
-
-## Documentation ownership
-
-- User workflows belong in [`quantization/`](quantization/).
-- Command syntax belongs in [`cli.md`](cli.md).
-- Tensor layout definitions belong in [`formats/`](formats/).
-- Package layout and extension rules belong in this page.
+1. Add solver, import, or bridge logic under `algorithms/` or `backends/`.
+2. Add or extend a CLI command at the boundary.
+3. Emit a report that can be checked by tests and CI.
+4. Link the user workflow from [`quantization/`](quantization/).

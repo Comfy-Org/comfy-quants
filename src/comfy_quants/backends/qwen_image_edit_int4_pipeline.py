@@ -1,9 +1,7 @@
-"""External Qwen-Image-Edit-2511 INT4 tile-pack pipeline runner.
+"""Qwen-Image-Edit-2511 INT4 tile-pack export pipeline.
 
-This module coordinates local external tools by subprocess.  It intentionally
-keeps the core package independent from DeepCompressor, Nunchaku, ComfyUI, and
-comfy-kitchen imports while still providing a single production entrypoint for
-the verified Qwen-Image-Edit-2511 INT4 artifact flow.
+The runner resolves local tool paths, executes the search/PTQ and conversion
+steps, then writes and inspects the final ComfyUI-loadable artifact.
 """
 
 from __future__ import annotations
@@ -22,8 +20,8 @@ from comfy_quants.utils.hashing import hash_file
 from comfy_quants.utils.jsonio import write_json, write_yaml
 
 
-DEFAULT_DEEPCOMPRESSOR_ROOT = Path("/workspace/external/deepcompressor-yidhar")
-DEFAULT_NUNCHAKU_ROOT = Path("/workspace/external/nunchaku")
+DEFAULT_DEEPCOMPRESSOR_ROOT = Path(os.environ.get("COMFY_QUANTS_DEEPCOMPRESSOR_ROOT", "DeepCompressor"))
+DEFAULT_NUNCHAKU_ROOT = Path(os.environ.get("COMFY_QUANTS_NUNCHAKU_ROOT", "nunchaku"))
 DEFAULT_MODEL_ID = "Qwen/Qwen-Image-Edit-2511"
 DEFAULT_SEARCH_STRENGTH = "quality-r64"
 DEFAULT_CALIBRATION_SAMPLES = 128
@@ -91,10 +89,10 @@ class PipelineCommand:
 
 @dataclass(frozen=True)
 class QwenImageEditInt4PipelineConfig:
-    """Configuration for the verified external INT4 tile-pack flow."""
+    """Configuration for the Qwen-Image-Edit-2511 INT4 tile-pack flow."""
 
     output: Path
-    base_comfy: Path | None = None
+    base_checkpoint: Path | None = None
     model_id: str = DEFAULT_MODEL_ID
     deepcompressor_root: Path = DEFAULT_DEEPCOMPRESSOR_ROOT
     nunchaku_root: Path = DEFAULT_NUNCHAKU_ROOT
@@ -125,7 +123,7 @@ class QwenImageEditInt4PipelineConfig:
         output = _local_path(self.output)
         deep_root = _local_path(self.deepcompressor_root)
         nunchaku_root = _local_path(self.nunchaku_root)
-        base_comfy = _local_path(self.base_comfy) if self.base_comfy is not None else None
+        base_checkpoint = _local_path(self.base_checkpoint) if self.base_checkpoint is not None else None
         quant_path = _local_path(self.quant_path) if self.quant_path is not None else None
         runs_root = _local_path(self.runs_root) if self.runs_root is not None else deep_root / "runs"
         export_root = _local_path(self.export_root) if self.export_root is not None else _default_export_root(output)
@@ -147,7 +145,7 @@ class QwenImageEditInt4PipelineConfig:
 
         resolved = ResolvedQwenImageEditInt4PipelineConfig(
             output=output,
-            base_comfy=base_comfy,
+            base_checkpoint=base_checkpoint,
             model_id=self.model_id,
             deepcompressor_root=deep_root,
             nunchaku_root=nunchaku_root,
@@ -184,7 +182,7 @@ class ResolvedQwenImageEditInt4PipelineConfig:
     """Fully resolved paths and switches used by the runner."""
 
     output: Path
-    base_comfy: Path | None
+    base_checkpoint: Path | None
     model_id: str
     deepcompressor_root: Path
     nunchaku_root: Path
@@ -240,7 +238,7 @@ class ResolvedQwenImageEditInt4PipelineConfig:
             raise ConfigurationError("--calibration-samples must be a positive integer")
         if self.awq_group_size <= 0:
             raise ConfigurationError("--awq-group-size must be a positive integer")
-        if self.route == "nunchaku-bridge" and self.base_comfy is None:
+        if self.route == "nunchaku-bridge" and self.base_checkpoint is None:
             raise ConfigurationError("--base-checkpoint is required for the nunchaku-bridge route")
         if static_only:
             return
@@ -267,15 +265,14 @@ class ResolvedQwenImageEditInt4PipelineConfig:
             _require_dir(self.nunchaku_root, "Nunchaku root")
             _require_file(self.nunchaku_root / "nunchaku/merge_safetensors.py", "Nunchaku merge_safetensors module")
             _require_dir(self.nunchaku_root / "tools/kitchen_native", "Nunchaku kitchen-native helper directory")
-            assert self.base_comfy is not None
-            _require_file(self.base_comfy, "base BF16 scaffold checkpoint")
+            assert self.base_checkpoint is not None
+            _require_file(self.base_checkpoint, "base BF16 transformer checkpoint")
 
     def to_public_dict(self) -> dict[str, Any]:
         data = asdict(self)
         for key, value in list(data.items()):
             if isinstance(value, Path):
                 data[key] = str(value)
-        data["base_checkpoint"] = data.pop("base_comfy")
         data["run_ptq"] = self.run_ptq
         data["split_dir"] = str(self.split_dir)
         data["ptq_override_path"] = str(self.ptq_override_path)
@@ -565,7 +562,7 @@ class QwenImageEditInt4TilepackPipeline:
         awq_args = ["--awq-group-size", str(cfg.awq_group_size)]
         if cfg.no_awq_modulation:
             awq_args.append("--no-awq-modulation")
-        assert cfg.base_comfy is not None
+        assert cfg.base_checkpoint is not None
         commands.append(
             PipelineCommand(
                 label="kitchen_tilepack_convert",
@@ -581,7 +578,7 @@ class QwenImageEditInt4TilepackPipeline:
                     "--raw-nunchaku",
                     str(cfg.raw_nunchaku),
                     "--base-comfy",
-                    str(cfg.base_comfy),
+                    str(cfg.base_checkpoint),
                     "--output",
                     str(cfg.output),
                     *awq_args,

@@ -17,7 +17,7 @@ format reference, or command-line help.
 
 - [`quantization/fp8.md`](quantization/fp8.md) — export Qwen FP8 E4M3/E5M2 checkpoints.
 - [`quantization/qwen_image_edit_2511_int4.md`](quantization/qwen_image_edit_2511_int4.md) — one-step Qwen-Image-Edit-2511 INT4 tile-pack export.
-- [`quantization/native_int4.md`](quantization/native_int4.md) — package-native INT4 solver for development and advanced use.
+- [`quantization/native_int4.md`](quantization/native_int4.md) — built-in INT4 solver for development and advanced use.
 - [`quantization/int4_tools.md`](quantization/int4_tools.md) — inspect and repack existing INT4 artifacts.
 
 ## Format references
