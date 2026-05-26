@@ -1,11 +1,12 @@
 # Built-in INT4 solver
 
-`quantize-int4` runs the built-in Qwen-Image-Edit INT4 solver from a dense
-transformer checkpoint and writes a `svdquant_w4a4` tile-pack artifact.
+`quantize-int4` runs the built-in INT4 solver from a dense transformer
+checkpoint and writes a `svdquant_w4a4` tile-pack artifact. The current
+model-family contract is `qwen_image_edit`.
 
 Use this entrypoint when you are developing or evaluating the built-in solver.
-For the ready-to-run Qwen-Image-Edit-2511 flow that uses DeepCompressor search/PTQ
-and Nunchaku conversion, use
+For the ready-to-run model-family flow that owns calibration/search defaults,
+external PTQ, conversion, and final inspection, use
 [`qwen_image_edit_2511_int4.md`](qwen_image_edit_2511_int4.md).
 
 ## Inputs
@@ -57,7 +58,7 @@ comfy-quants quantize-int4 \
   --family qwen_image_edit \
   --format svdquant_w4a4 \
   --source /path/to/diffusion_pytorch_model.safetensors \
-  --activation-stats /path/to/int4_activation_stats.json \
+  --activation-stats /path/to/activation_stats.json \
   --quantization-mode calibrated_svdquant \
   --out runs/qwen-edit-2511/int4-svdquant-w4a4-calibrated \
   --rank 64 \
@@ -73,8 +74,8 @@ comfy-quants quantize-int4 \
   --family qwen_image_edit \
   --format svdquant_w4a4 \
   --source /path/to/diffusion_pytorch_model.safetensors \
-  --activation-stats /path/to/int4_activation_stats.json \
-  --gptq-hessian-stats /path/to/int4_gptq_hessian_stats.json \
+  --activation-stats /path/to/activation_stats.json \
+  --gptq-hessian-stats /path/to/gptq_hessian_stats.json \
   --quantization-mode svdquant_gptq_experimental \
   --out runs/qwen-edit-2511/int4-svdquant-w4a4-gptq \
   --rank 64 \

@@ -1,8 +1,19 @@
 # FP8 E4M3 / E5M2 export
 
-Use this flow to export Qwen-Image and Qwen-Image-Edit transformer checkpoints as
-ComfyUI-loadable FP8 `.safetensors` files. Format details are defined in
-[`../formats/fp8.md`](../formats/fp8.md).
+Use this guide when the target artifact is a full FP8 transformer checkpoint.
+The exported file is a ComfyUI-loadable `.safetensors` checkpoint. Format
+details are defined in [`../formats/fp8.md`](../formats/fp8.md).
+
+Model-family config files select the tensor contract, source layout, target FP8
+dtype, and output naming rules. Start with the format, then choose one of the
+supported model-family configs below.
+
+## Supported model-family configs
+
+| Model family | E4M3 config | E5M2 config |
+| --- | --- | --- |
+| Qwen-Image | `configs/qwen_image_2512_fp8_static.yaml` | `configs/qwen_image_2512_fp8_e5m2_static.yaml` |
+| Qwen-Image-Edit-2511 | `configs/qwen_image_edit_2511_fp8_static.yaml` | `configs/qwen_image_edit_2511_fp8_e5m2_static.yaml` |
 
 ## Inputs
 
@@ -13,21 +24,12 @@ ComfyUI-loadable FP8 `.safetensors` files. Format details are defined in
 | Output path | `--out` | Output `.safetensors` path or output directory. |
 | Device | `--device` | Torch device. `auto` uses `cuda:0` when available and falls back to CPU. |
 
-Example configs:
-
-```text
-configs/qwen_image_2512_fp8_static.yaml
-configs/qwen_image_2512_fp8_e5m2_static.yaml
-configs/qwen_image_edit_2511_fp8_static.yaml
-configs/qwen_image_edit_2511_fp8_e5m2_static.yaml
-```
-
 ## Plan without writing checkpoint bytes
 
 ```bash
 comfy-quants quantize \
-  --config configs/qwen_image_edit_2511_fp8_static.yaml \
-  --work-dir runs/qwen-edit-2511/fp8-e4m3-plan \
+  --config /path/to/fp8_config.yaml \
+  --work-dir runs/fp8-plan \
   --dry-run \
   --json
 ```
@@ -38,9 +40,9 @@ E4M3:
 
 ```bash
 comfy-quants export-model \
-  --config configs/qwen_image_edit_2511_fp8_static.yaml \
-  --source /absolute/path/to/diffusion_pytorch_model.safetensors \
-  --out runs/qwen-edit-2511/export-fp8-e4m3 \
+  --config /path/to/fp8_e4m3_config.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out runs/export-fp8-e4m3 \
   --device cuda:0 \
   --hash-output \
   --json
@@ -50,9 +52,9 @@ E5M2:
 
 ```bash
 comfy-quants export-model \
-  --config configs/qwen_image_edit_2511_fp8_e5m2_static.yaml \
-  --source /absolute/path/to/diffusion_pytorch_model.safetensors \
-  --out runs/qwen-edit-2511/export-fp8-e5m2 \
+  --config /path/to/fp8_e5m2_config.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out runs/export-fp8-e5m2 \
   --device cuda:0 \
   --hash-output \
   --json
@@ -72,8 +74,8 @@ inference checkpoint:
 
 ```bash
 comfy-quants quantize \
-  --config /absolute/path/to/local-qwen-fp8.yaml \
-  --work-dir runs/qwen-image-local/fp8-static-v0 \
+  --config /path/to/fp8_config.yaml \
+  --work-dir runs/fp8-static-v0 \
   --device cuda:0 \
   --json
 ```

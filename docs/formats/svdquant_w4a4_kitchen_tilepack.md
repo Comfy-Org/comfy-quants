@@ -1,9 +1,8 @@
 # SVDQuant W4A4 kitchen tile-pack format
 
-This page defines the reusable SVDQuant W4A4 storage contract. Quantization commands
-are documented in [`../quantization/qwen_image_edit_2511_int4.md`](../quantization/qwen_image_edit_2511_int4.md),
-[`../quantization/native_int4.md`](../quantization/native_int4.md), and
-[`../quantization/int4_tools.md`](../quantization/int4_tools.md).
+This page defines the reusable SVDQuant W4A4 storage contract. Start from
+[`../quantization/int4.md`](../quantization/int4.md) for export workflows and
+model-family guides.
 
 ## Identifiers
 
@@ -84,7 +83,7 @@ The fixed `weight` tile tail is:
 
 ## How model adapters use this format
 
-For Qwen-Image-Edit INT4 bundles, the model adapter maps attention and MLP
-linear layers to SVDQuant W4A4. Other layer families may stay high precision or
-use another format such as AWQ W4A16. QKV splitting and Qwen-specific tensor
-names are handled by the model adapter or export bridge.
+A model adapter maps selected linear layer families to SVDQuant W4A4. Other
+layer families may stay high precision or use another format such as AWQ W4A16.
+QKV splitting and model-family-specific tensor names are handled by the model
+adapter or export bridge.

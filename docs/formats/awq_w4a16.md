@@ -1,7 +1,8 @@
 # AWQ W4A16 format
 
-This page defines the AWQ W4A16 tensor contract used by INT4 model bundles. User
-commands are documented in [`../quantization/int4_tools.md`](../quantization/int4_tools.md).
+This page defines the AWQ W4A16 tensor contract used by INT4 model bundles. Start
+from [`../quantization/int4.md`](../quantization/int4.md) for export workflows
+and model-family guides.
 
 ## Identifier
 
@@ -39,13 +40,9 @@ dequant_weight[n, k] =
 
 ## Intended model usage
 
-For Qwen-Image-Edit INT4 bundles, AWQ W4A16 is intended for modulation linear
-layers when the target runtime supports that mixed layout:
+AWQ W4A16 is for model-family-selected linear layers when the target runtime
+supports a mixed INT4 bundle. The exact layer patterns belong in the
+model-family guide for the selected INT4 workflow.
 
-```text
-transformer_blocks.*.img_mod.1
-transformer_blocks.*.txt_mod.1
-```
-
-Attention and MLP linears use the SVDQuant W4A4 format described in
-[`svdquant_w4a4_kitchen_tilepack.md`](svdquant_w4a4_kitchen_tilepack.md).
+Other layer families in the same bundle may use the SVDQuant W4A4 format
+described in [`svdquant_w4a4_kitchen_tilepack.md`](svdquant_w4a4_kitchen_tilepack.md).

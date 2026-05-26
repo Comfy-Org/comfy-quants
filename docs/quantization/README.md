@@ -1,29 +1,36 @@
 # Quantization guides
 
-Start with the artifact you want to create. Format-level tensor definitions live
-under [`../formats/`](../formats/).
+Choose the output format first. Each format section then lists the supported
+model-family flows for that format. Tensor/storage definitions live under
+[`../formats/`](../formats/).
 
-## Choose an entrypoint
+## Format matrix
 
-| I want to... | Use | Main inputs | Output | Guide |
-| --- | --- | --- | --- | --- |
-| Export a Qwen FP8 checkpoint | `comfy-quants export-model` | FP8 config; local transformer checkpoint; CUDA device | FP8 `.safetensors` checkpoint | [`fp8.md`](fp8.md) |
-| Produce Qwen-Image-Edit-2511 INT4 for ComfyUI | `comfy-quants qwen-image-edit-2511-int4` | Qwen model; BF16 base checkpoint; DeepCompressor; Nunchaku; calibration set | single `svdquant_w4a4` tile-pack `.safetensors` | [`qwen_image_edit_2511_int4.md`](qwen_image_edit_2511_int4.md) |
-| Work on the built-in INT4 solver | `comfy-quants quantize-int4` | dense checkpoint; optional activation stats; optional GPTQ Hessians | `svdquant_w4a4` tile-pack artifact | [`native_int4.md`](native_int4.md) |
-| Inspect or repack INT4 artifacts | `comfy-quants inspect-int4`, `comfy-quants export-int4` | existing tile-pack or imported PTQ artifact directory | JSON report or repacked tile-pack | [`int4_tools.md`](int4_tools.md) |
+| Output format | Workflow guide | Format reference | Model-family flows |
+| --- | --- | --- | --- |
+| FP8 E4M3 / E5M2 checkpoint | [`fp8.md`](fp8.md) | [`../formats/fp8.md`](../formats/fp8.md) | listed in the FP8 guide |
+| INT4 SVDQuant W4A4 tile-pack | [`int4.md`](int4.md) | [`../formats/svdquant_w4a4_kitchen_tilepack.md`](../formats/svdquant_w4a4_kitchen_tilepack.md) | listed in the INT4 guide |
+| INT4 AWQ W4A16 tensors | [`int4.md`](int4.md) | [`../formats/awq_w4a16.md`](../formats/awq_w4a16.md) | used by supported mixed INT4 bundles |
 
-## Recommended starting points
+## FP8
 
-- For Qwen-Image-Edit-2511 INT4, start with
-  [`qwen_image_edit_2511_int4.md`](qwen_image_edit_2511_int4.md). It is the
-  complete one-command export path for the `svdquant_w4a4` tile-pack artifact.
-- For FP8 E4M3 or E5M2 exports, start with [`fp8.md`](fp8.md).
-- Use [`int4_tools.md`](int4_tools.md) when you already have an INT4 artifact and
-  only need to inspect or repack it.
+Start with [`fp8.md`](fp8.md) when the target artifact is a full FP8 checkpoint.
+The page lists the supported config files and model-family examples for E4M3 and
+E5M2 exports.
+
+## INT4
+
+Start with [`int4.md`](int4.md) when the target artifact is an INT4 tile-pack
+checkpoint. The page links to:
+
+- model-family one-step export guides;
+- built-in solver usage;
+- artifact inspection and repack tools;
+- SVDQuant W4A4 and AWQ W4A16 format references.
 
 ## Validation flow
 
-1. Export the checkpoint with the selected command.
+1. Export the checkpoint with the selected format workflow.
 2. Run the relevant inspector, for example `comfy-quants inspect-int4` for INT4
    tile-pack artifacts.
 3. Load the exported `.safetensors` file in a compatible ComfyUI setup and run an

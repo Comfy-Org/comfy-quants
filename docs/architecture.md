@@ -27,10 +27,9 @@ quantization/export logic stays here.
 
 ## External toolchains
 
-Some flows use established quantization or conversion projects. For example, the
-Qwen-Image-Edit-2511 INT4 guide asks for local DeepCompressor and Nunchaku paths.
-Those paths are provided explicitly in the CLI command, and the final artifact is
-still written and inspected by `comfy-quants`.
+Some flows use established quantization or conversion projects. Those tool
+paths are provided explicitly in the CLI command, and the final artifact is still
+written and inspected by `comfy-quants`.
 
 ## Source layout
 

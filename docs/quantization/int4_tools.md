@@ -9,15 +9,16 @@ search, or GPTQ.
 
 ```bash
 comfy-quants inspect-int4 \
-  --artifact /absolute/path/to/qwen_edit_2511_int4_tilepack.safetensors \
-  --family qwen_image_edit \
+  --artifact /path/to/model_int4_tilepack.safetensors \
+  --family <model_family> \
   --format svdquant_w4a4 \
-  --strict-qwen-image-edit-2511 \
   --json
 ```
 
 The inspector checks tensor names, tensor counts, QKV split layout, rank, low-rank
-branch tensors, and Qwen-Image-Edit-2511 shape rules. It does not run image inference.
+branch tensors, and model-family shape rules. It does not run image inference.
+Model-family guides may add stricter inspection flags for known tensor counts and
+naming rules.
 
 ## Repack an existing INT4 artifact
 
@@ -26,9 +27,9 @@ branch tensors, and Qwen-Image-Edit-2511 shape rules. It does not run image infe
 ```bash
 comfy-quants export-int4 \
   --format svdquant_w4a4 \
-  --source-format deepcompressor-qwen-image-edit \
-  --source /absolute/path/to/deepcompressor-ptq-artifacts \
-  --out runs/qwen-edit-2511/export-int4 \
+  --source-format <source_format> \
+  --source /path/to/int4-source-artifacts \
+  --out runs/export-int4 \
   --device cuda:0 \
   --hash-output \
   --json

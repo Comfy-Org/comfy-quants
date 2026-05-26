@@ -15,20 +15,20 @@ Use this page for command syntax. For complete workflows, start with
 
 ```bash
 comfy-quants inspect \
-  --model Qwen/Qwen-Image-Edit-2511 \
-  --family qwen_image_edit \
-  --out runs/qwen-edit-2511/inspect \
+  --model /path/to/model \
+  --family <model_family> \
+  --out runs/inspect \
   --json
 ```
 
-## FP8 planning and export
+## FP8 commands
 
 Plan selected tensors without writing checkpoint bytes:
 
 ```bash
 comfy-quants quantize \
-  --config configs/qwen_image_edit_2511_fp8_static.yaml \
-  --work-dir runs/qwen-edit-2511/fp8-e4m3-plan \
+  --config /path/to/fp8_config.yaml \
+  --work-dir runs/fp8-plan \
   --dry-run \
   --json
 ```
@@ -37,9 +37,9 @@ Export a full ComfyUI-loadable FP8 checkpoint:
 
 ```bash
 comfy-quants export-model \
-  --config configs/qwen_image_edit_2511_fp8_static.yaml \
+  --config /path/to/fp8_config.yaml \
   --source /path/to/diffusion_pytorch_model.safetensors \
-  --out runs/qwen-edit-2511/export-fp8-e4m3 \
+  --out runs/export-fp8 \
   --device cuda:0 \
   --hash-output \
   --json
@@ -47,15 +47,29 @@ comfy-quants export-model \
 
 Guide: [`quantization/fp8.md`](quantization/fp8.md).
 
-## Qwen-Image-Edit-2511 INT4 one-step export
+## INT4 commands
+
+Open the INT4 format guide first, then choose one of the model-family flows
+listed there. Format-level commands are:
 
 ```bash
-comfy-quants qwen-image-edit-2511-int4 \
-  --model /path/to/Qwen-Image-Edit-2511 \
-  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
-  --out /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
-  --deepcompressor-root /path/to/DeepCompressor \
-  --nunchaku-root /path/to/nunchaku \
+comfy-quants quantize-int4 --help
+comfy-quants inspect-int4 --help
+comfy-quants export-int4 --help
+```
+
+Model-family one-step commands are listed in
+[`quantization/int4.md`](quantization/int4.md).
+
+## INT4 one-step export pattern
+
+Model-family one-step commands follow this pattern:
+
+```bash
+comfy-quants <model-family-int4-command> \
+  --model /path/to/model \
+  --base-checkpoint /path/to/base_transformer.safetensors \
+  --out /path/to/model_int4_tilepack.safetensors \
   --calibration-samples 128 \
   --search-strength quality-r64 \
   --gpus 0 \
@@ -63,27 +77,18 @@ comfy-quants qwen-image-edit-2511-int4 \
   --json
 ```
 
-Useful options:
+Some commands require additional tool paths or model-family-specific options. Use
+`comfy-quants <command> --help` and the linked model-family guide for the exact
+arguments.
 
-| Option | Meaning |
-| --- | --- |
-| `--calibration-path` | Custom calibration cache or dataset path. |
-| `--calibration-samples` | Calibration sample count. Default: `128`. |
-| `--search-strength` | Search preset. Default: `quality-r64`. |
-| `--quant-path` | Reuse an existing DeepCompressor PTQ artifact directory. |
-| `--reuse` | Reuse existing intermediate artifacts when present. |
-| `--dry-run` | Print the resolved plan without running the export. |
-
-Guide: [`quantization/qwen_image_edit_2511_int4.md`](quantization/qwen_image_edit_2511_int4.md).
-
-## Built-in INT4 solver
+## Built-in INT4 solver pattern
 
 ```bash
 comfy-quants quantize-int4 \
-  --family qwen_image_edit \
+  --family <model_family> \
   --format svdquant_w4a4 \
   --source /path/to/diffusion_pytorch_model.safetensors \
-  --out runs/qwen-edit-2511/int4-svdquant-w4a4 \
+  --out runs/int4-svdquant-w4a4 \
   --rank 64 \
   --device cuda:0 \
   --hash-output \
@@ -116,10 +121,9 @@ comfy-quants calib reduce-int4-gptq-hessians --help
 
 ```bash
 comfy-quants inspect-int4 \
-  --artifact /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
-  --family qwen_image_edit \
+  --artifact /path/to/model_int4_tilepack.safetensors \
+  --family <model_family> \
   --format svdquant_w4a4 \
-  --strict-qwen-image-edit-2511 \
   --json
 ```
 
@@ -130,9 +134,9 @@ Guide: [`quantization/int4_tools.md`](quantization/int4_tools.md).
 ```bash
 comfy-quants export-int4 \
   --format svdquant_w4a4 \
-  --source-format deepcompressor-qwen-image-edit \
-  --source /path/to/deepcompressor-ptq-artifacts \
-  --out runs/qwen-edit-2511/export-int4 \
+  --source-format <source_format> \
+  --source /path/to/int4-source-artifacts \
+  --out runs/export-int4 \
   --device cuda:0 \
   --hash-output \
   --json
