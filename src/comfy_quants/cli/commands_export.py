@@ -10,7 +10,7 @@ from comfy_quants.utils.jsonio import write_json
 
 
 def register(subparsers):
-    parser = subparsers.add_parser("export", help="Export an internal artifact to a backend format")
+    parser = subparsers.add_parser("export", help="Create an export manifest for an artifact")
     parser.add_argument("--artifact", required=True)
     parser.add_argument("--format", default=None)
     parser.add_argument("--backend", default=None)

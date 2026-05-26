@@ -1,23 +1,60 @@
 # Comfy Quants
 
-Comfy Quants is an offline quantization toolkit for producing **ComfyUI-loadable
-model artifacts**. It reads local model weights, runs a selected quantization flow,
-and writes single-file `.safetensors` checkpoints that match the target ComfyUI /
-comfy-kitchen storage contract.
+Comfy Quants is an offline quantization toolkit for building **ComfyUI-loadable
+model checkpoints** from local model weights. Pick a quantization flow, run the
+export, and get a single-file `.safetensors` artifact that can be placed in a
+compatible ComfyUI model directory or loaded by a compatible ComfyUI node.
 
 中文说明见：[中文说明](#中文说明)。
 
-## Install
+## Quick start
+
+Install from a local checkout:
 
 ```bash
+git clone https://github.com/Comfy-Org/comfy-quants.git
+cd comfy-quants
 pip install -e .
-comfy-quants doctor --json
+```
+
+Export a Qwen-Image-Edit-2511 INT4 tile-pack checkpoint:
+
+```bash
+comfy-quants qwen-image-edit-2511-int4 \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
+  --out /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
+  --calibration-samples 128 \
+  --search-strength quality-r64 \
+  --gpus 0 \
+  --hash-output
+```
+
+Inspect the exported checkpoint:
+
+```bash
+comfy-quants inspect-int4 \
+  --artifact /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --family qwen_image_edit \
+  --format svdquant_w4a4 \
+  --strict-qwen-image-edit-2511 \
+  --json
+```
+
+Then copy or symlink the `.safetensors` file into the target ComfyUI model path
+and load it with a compatible ComfyUI setup. For other flows, start with
+[`docs/README.md`](docs/README.md) or run:
+
+```bash
+comfy-quants --help
 ```
 
 Source-tree equivalent:
 
 ```bash
-PYTHONPATH=src python -m comfy_quants.cli.main doctor --json
+PYTHONPATH=src python -m comfy_quants.cli.main --help
 ```
 
 ## Public names
@@ -40,15 +77,19 @@ PYTHONPATH=src python -m comfy_quants.cli.main doctor --json
 
 Documentation index: [`docs/README.md`](docs/README.md).
 
-## Package boundary
+## How it fits with ComfyUI
 
-`comfy_quants` targets ComfyUI artifacts, not the ComfyUI runtime.
+Comfy Quants runs quantization and checkpoint export outside ComfyUI, then writes
+artifacts for ComfyUI-compatible loaders. A typical workflow is:
 
-- The package does not import, vendor, start, or configure ComfyUI.
-- The package does not use ComfyUI as a hidden parser for model formats.
-- The package does not declare DeepCompressor, Nunchaku, or comfy-kitchen as Python dependencies.
-- The package stores the required model and format contracts in its own source tree.
-- External tools are invoked only through explicit command-line/subprocess boundaries.
+1. prepare the source model and calibration data locally;
+2. run one of the `comfy-quants` CLI flows;
+3. copy or symlink the produced `.safetensors` file into the target ComfyUI model path;
+4. load the checkpoint in ComfyUI for sampling and image validation.
+
+If you want in-ComfyUI quantization nodes, build them as a separate custom-node
+project and call this package through its CLI or Python API. This keeps the export
+library reusable while still allowing downstream UI/workflow integrations.
 
 ## Repository layout
 
@@ -79,24 +120,59 @@ python -m pytest tests/unit -q
 
 ## 中文说明
 
-Comfy Quants 是一个离线量化工具库，用于产出 **ComfyUI 可以加载的模型文件**。
-它读取本地模型权重，执行指定量化流程，并写出符合 ComfyUI / comfy-kitchen
-存储约定的单文件 `.safetensors` checkpoint。
+Comfy Quants 是一个离线量化工具库，用于把本地模型权重量化并导出为
+**ComfyUI 可以加载的模型 checkpoint**。选择一个量化流程，运行导出命令，得到
+单文件 `.safetensors` artifact；之后可以把它放到对应的 ComfyUI 模型目录，或由
+兼容的 ComfyUI 节点加载。
 
-这个仓库是量化核心库，不是 ComfyUI runtime 集成包。ComfyUI custom node、UI、
-workflow 集成应放在独立 adapter 仓库中。
+## 快速开始
 
-## 安装
+从本地源码安装：
 
 ```bash
+git clone https://github.com/Comfy-Org/comfy-quants.git
+cd comfy-quants
 pip install -e .
-comfy-quants doctor --json
+```
+
+导出 Qwen-Image-Edit-2511 INT4 tile-pack checkpoint：
+
+```bash
+comfy-quants qwen-image-edit-2511-int4 \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
+  --out /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
+  --calibration-samples 128 \
+  --search-strength quality-r64 \
+  --gpus 0 \
+  --hash-output
+```
+
+检查导出的 checkpoint 结构：
+
+```bash
+comfy-quants inspect-int4 \
+  --artifact /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --family qwen_image_edit \
+  --format svdquant_w4a4 \
+  --strict-qwen-image-edit-2511 \
+  --json
+```
+
+然后将 `.safetensors` 文件复制或软链到目标 ComfyUI 模型目录，并在兼容的
+ComfyUI 环境中加载。其他量化流程从 [`docs/README.md`](docs/README.md) 开始，
+或查看命令帮助：
+
+```bash
+comfy-quants --help
 ```
 
 源码树运行方式：
 
 ```bash
-PYTHONPATH=src python -m comfy_quants.cli.main doctor --json
+PYTHONPATH=src python -m comfy_quants.cli.main --help
 ```
 
 ## 公开命名
@@ -119,15 +195,36 @@ PYTHONPATH=src python -m comfy_quants.cli.main doctor --json
 
 文档索引：[`docs/README.md`](docs/README.md)。
 
-## 包边界
+## 和 ComfyUI 怎么配合
 
-`comfy_quants` 的目标是产出 ComfyUI artifact，不是运行 ComfyUI runtime。
+Comfy Quants 在 ComfyUI 外完成量化和 checkpoint 导出，输出文件面向
+ComfyUI-compatible loader。常见流程是：
 
-- 本库不导入、不内嵌、不启动、不配置 ComfyUI；
-- 本库不把 ComfyUI 当作隐藏的模型格式解析器；
-- 本库不声明 DeepCompressor、Nunchaku、comfy-kitchen 为 Python 依赖；
-- 本库在自己的源码树中维护需要的模型结构 contract 和格式 contract；
-- 外部工具只通过显式命令行 / subprocess 边界调用。
+1. 在本地准备源模型和校准数据；
+2. 运行对应的 `comfy-quants` CLI 量化流程；
+3. 将产出的 `.safetensors` 文件复制或软链到目标 ComfyUI 模型目录；
+4. 在 ComfyUI 中加载 checkpoint，进行采样和出图验证。
+
+如果需要在 ComfyUI 里通过节点执行量化，可以在独立 custom-node 项目中依赖
+本包，并调用本包的 CLI 或 Python API。这样量化导出能力可以复用，UI / workflow
+集成也可以独立迭代。
+
+## 仓库结构
+
+```text
+src/comfy_quants/
+├── cli/              # 命令入口
+├── sdk/              # Python API
+├── core/             # schema 和领域对象
+├── model_adapters/   # 模型族 tensor contract 与层选择规则
+├── algorithms/       # 量化算法与 planner
+├── formats/          # 可复用存储格式
+├── backends/         # safetensors writer、importer、export pipeline
+├── calibration/      # 校准 manifest 与统计 reducer
+├── registry/         # 本地 registry
+├── validation/       # artifact 检查与报告
+└── utils/            # JSON、hash、系统工具
+```
 
 架构说明见：[`docs/architecture.md`](docs/architecture.md)。
 

@@ -28,7 +28,7 @@ def test_qwen_image_edit_int4_dry_run_uses_verified_defaults(tmp_path: Path, cap
             str(nunchaku_root),
             "--model",
             "/models/Qwen-Image-Edit-2511",
-            "--base-comfy",
+            "--base-checkpoint",
             str(tmp_path / "base.bf16.safetensors"),
             "--out",
             str(out),
@@ -79,7 +79,7 @@ def test_qwen_image_edit_int4_dry_run_allows_calib_and_strength_overrides(tmp_pa
             str(tmp_path / "deepcompressor"),
             "--nunchaku-root",
             str(tmp_path / "nunchaku"),
-            "--base-comfy",
+            "--base-checkpoint",
             str(tmp_path / "base.safetensors"),
             "--out",
             str(out),
@@ -120,7 +120,7 @@ def test_qwen_image_edit_int4_dry_run_allows_calib_and_strength_overrides(tmp_pa
     assert all(command["label"] != "deepcompressor_ptq" for command in result["commands"])
 
 
-def test_qwen_image_edit_int4_deepcompressor_import_route_does_not_require_base_comfy(
+def test_qwen_image_edit_int4_deepcompressor_import_route_does_not_require_base_checkpoint(
     tmp_path: Path, capsys
 ) -> None:
     quant_path = tmp_path / "ptq" / "model"
@@ -142,7 +142,7 @@ def test_qwen_image_edit_int4_deepcompressor_import_route_does_not_require_base_
 
     assert code == 0
     result = _load_stdout_json(capsys)
-    assert result["config"]["base_comfy"] is None
+    assert result["config"]["base_checkpoint"] is None
     assert result["config"]["run_ptq"] is False
     labels = [command["label"] for command in result["commands"]]
     assert labels == ["deepcompressor_import_export"]
@@ -156,7 +156,7 @@ def test_qwen_image_edit_int4_rejects_invalid_calibration_samples(tmp_path: Path
             str(tmp_path / "deepcompressor"),
             "--nunchaku-root",
             str(tmp_path / "nunchaku"),
-            "--base-comfy",
+            "--base-checkpoint",
             str(tmp_path / "base.safetensors"),
             "--out",
             str(tmp_path / "out.safetensors"),

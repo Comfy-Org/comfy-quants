@@ -43,17 +43,6 @@ diffusion_pytorch_model.svdquant_w4a4.safetensors
 Use [`qwen_image_edit_2511_int4.md`](qwen_image_edit_2511_int4.md) when calibration,
 search, PTQ, conversion, and tile-pack export should run as one flow.
 
-## Runtime fixture helpers
-
-Fixture commands produce small artifacts and JSON reports for external runtime checks:
-
-```bash
-comfy-quants make-int4-runtime-fixture --help
-comfy-quants make-awq-runtime-fixture --help
-comfy-quants validate-runtime-fixture-output --help
-comfy-quants validate-int4-runtime-readiness --help
-```
-
 ## Format references
 
 - [`../formats/svdquant_w4a4_kitchen_tilepack.md`](../formats/svdquant_w4a4_kitchen_tilepack.md)
