@@ -1,0 +1,66 @@
+project:
+  name: qwen-image-edit-2511-fp8-static-v0
+  created_by: comfy_quants
+  seed: 42
+model:
+  family: qwen_image_edit
+  model_id: Qwen/Qwen-Image-Edit-2511
+  revision: "<pin-this>"
+  dtype: bf16
+  source: huggingface
+  components:
+    transformer: quantize
+    visual_semantic_path: keep_bf16
+    vae: keep_bf16
+    text_encoder: keep_bf16
+hardware:
+  device: cuda:0
+  gpu_profile: rtx_pro_6000_blackwell_96gb
+  max_vram_gb: 88
+  cpu_offload: true
+  nvme_offload: false
+  scratch_dir: runs/qwen-edit-2511/scratch
+calibration:
+  source: runs/qwen-edit-2511/calib-v0
+  batch_size: 1
+  capture_dtype: bf16
+  edit_types:
+    - text_edit
+    - object_replace
+    - appearance_preserve
+    - style_transfer
+  activation_cache: runs/qwen-edit-2511/cache/calib-v0
+quant:
+  algorithm: fp8_static
+  target_dtype: fp8_e4m3
+  scale:
+    granularity: per_tensor
+    axis: null
+    method: amax
+  modules:
+    include:
+      - "transformer_blocks.*.attn.to_*"
+      - "transformer_blocks.*.attn.add_*_proj"
+      - "transformer_blocks.*.img_mlp.*"
+      - "transformer_blocks.*.txt_mlp.*"
+      - "transformer_blocks.*.img_mod.1"
+      - "transformer_blocks.*.txt_mod.1"
+    exclude:
+      - "transformer_blocks.0.img_mod.1"
+      - "*.norm*"
+      - "*txt_norm*"
+      - "*norm_out*"
+      - "*proj_out*"
+      - "*vae*"
+      - "*text_encoder*"
+      - "*visual_semantic_path*"
+  fallback:
+    on_error: keep_bf16
+validation:
+  smoke_edit_set: examples/edit_cases.jsonl
+  require_text_edit_cases: true
+  require_appearance_preserve_cases: true
+artifact:
+  format: safetensors_quant
+  compatibility_target: L2
+  write_module_reports: true

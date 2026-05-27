@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Comfy Quants Quant Tensor Index",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_state",
+    "tensor_payload_state",
+    "artifact_target",
+    "contract_source",
+    "contract_mode",
+    "contract_schema",
+    "payload_layout",
+    "format",
+    "selection",
+    "tensors"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "artifact_state": {"type": "string"},
+    "tensor_payload_state": {"type": "string"},
+    "artifact_target": {"type": ["string", "null"]},
+    "contract_source": {"type": ["string", "null"]},
+    "contract_mode": {"type": ["string", "null"]},
+    "contract_schema": {"type": ["string", "null"]},
+    "artifact_contract": {"type": ["object", "null"]},
+    "graph_kind": {"type": ["string", "null"]},
+    "tensor_coverage": {"type": ["string", "null"]},
+    "payload_layout": {"type": "object"},
+    "format": {"type": "object"},
+    "selection": {"type": "object"},
+    "tensors": {
+      "type": "array",
+      "items": {"type": "object"}
+    }
+  }
+}

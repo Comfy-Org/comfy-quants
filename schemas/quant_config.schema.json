@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Comfy Quants Quant Config",
+  "type": "object",
+  "required": ["project", "model"],
+  "properties": {
+    "project": {"type": "object"},
+    "model": {"type": "object"},
+    "hardware": {"type": "object"},
+    "calibration": {"type": "object"},
+    "quant": {"type": "object"},
+    "artifact": {"type": "object"},
+    "validation": {"type": "object"}
+  }
+}

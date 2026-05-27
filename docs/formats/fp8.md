@@ -1,0 +1,67 @@
+# FP8 checkpoint formats
+
+This page defines the FP8 checkpoint format mapping used by Comfy Quants exports.
+User commands are documented in [`../quantization/fp8.md`](../quantization/fp8.md).
+
+## How to produce this format
+
+Use `export-model` when you want a full FP8 `.safetensors` checkpoint that can
+be loaded by a compatible ComfyUI setup. Choose one config from the FP8 guide,
+then pass the local dense transformer checkpoint as `--source`.
+
+Example: Qwen-Image-Edit-2511 E4M3:
+
+```bash
+comfy-quants export-model \
+  --config configs/qwen_image_edit_2511_fp8_static.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/qwen_image_edit_2511_fp8_e4m3.safetensors \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+Example: Qwen-Image-Edit-2511 E5M2:
+
+```bash
+comfy-quants export-model \
+  --config configs/qwen_image_edit_2511_fp8_e5m2_static.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/qwen_image_edit_2511_fp8_e5m2.safetensors \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+For all supported FP8 model-family configs and dry-run planning, see
+[`../quantization/fp8.md`](../quantization/fp8.md).
+
+## Format identifiers
+
+| Comfy Quants target | Torch dtype | Safetensors dtype | ComfyUI checkpoint metadata |
+| --- | --- | --- | --- |
+| `fp8_e4m3` | `torch.float8_e4m3fn` | `F8_E4M3` | `float8_e4m3fn` |
+| `fp8_e5m2` | `torch.float8_e5m2` | `F8_E5M2` | `float8_e5m2` |
+
+This page covers the `fp8_e4m3` and `fp8_e5m2` checkpoint identifiers. MXFP8 and fast E4M3 variants should use separate identifiers if they are added later.
+
+## Layer side tensors
+
+For each quantized weight, the full checkpoint exporter writes the FP8 weight and
+small side tensors used by the target loader:
+
+```text
+<layer>.weight        FP8 tensor
+<layer>.weight_scale  scale tensor
+<layer>.input_scale   scale tensor
+<layer>.comfy_quant   uint8 JSON metadata tensor
+```
+
+The `comfy_quant` metadata identifies the stored FP8 checkpoint format and whether
+full-precision matrix multiplication is requested by the target loader.
+
+## Scope
+
+The FP8 format definition is reusable across model families. Model-family layer
+selection belongs in `model_adapters/`, and command usage belongs in
+`docs/quantization/fp8.md`.
