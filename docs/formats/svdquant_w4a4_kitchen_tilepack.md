@@ -4,6 +4,54 @@ This page defines the reusable SVDQuant W4A4 storage contract. Start from
 [`../quantization/int4.md`](../quantization/int4.md) for export workflows and
 model-family guides.
 
+## How to produce this format
+
+If your goal is to quantize **Qwen-Image-Edit-2511** to an INT4 checkpoint, use
+the model-family export command instead of writing this storage layout by hand.
+The command runs calibration/search, PTQ, QKV split and conversion, tile-pack
+export, and structural inspection.
+
+Full guide: [`../quantization/qwen_image_edit_2511_int4.md`](../quantization/qwen_image_edit_2511_int4.md)
+
+```bash
+comfy-quants qwen-image-edit-2511-int4 \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
+  --out /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
+  --calibration-samples 128 \
+  --search-strength quality-r64 \
+  --gpus 0 \
+  --hash-output \
+  --json
+```
+
+Common inputs:
+
+| Input | Argument | Notes |
+| --- | --- | --- |
+| Source model | `--model` | Hugging Face id or local `Qwen-Image-Edit-2511` directory. |
+| BF16 transformer checkpoint | `--base-checkpoint` | Used to assemble the final single-file checkpoint. |
+| Calibration cache or dataset | `--calibration-path` | Optional. If omitted, the default 128-sample calibration path from the full guide is used. |
+| Search preset | `--search-strength` | Default: `quality-r64`. |
+| GPU selector | `--gpus` | Default: `0`; passed to the PTQ step as `CUDA_VISIBLE_DEVICES`. |
+
+Inspect the exported file:
+
+```bash
+comfy-quants inspect-int4 \
+  --artifact /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --family qwen_image_edit \
+  --format svdquant_w4a4 \
+  --strict-qwen-image-edit-2511 \
+  --json
+```
+
+For custom calibration data, reusing an existing PTQ run, or previewing the
+resolved external commands with `--dry-run`, use the full Qwen-Image-Edit-2511
+guide linked above.
+
 ## Identifiers
 
 | Field | Value |
