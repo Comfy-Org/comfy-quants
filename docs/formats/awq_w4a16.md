@@ -4,6 +4,34 @@ This page defines the AWQ W4A16 tensor contract used by INT4 model bundles. Star
 from [`../quantization/int4.md`](../quantization/int4.md) for export workflows
 and model-family guides.
 
+## How to produce this format
+
+AWQ W4A16 is produced as part of supported mixed INT4 bundles. For
+Qwen-Image-Edit-2511, the one-step INT4 export keeps AWQ modulation enabled by
+default and writes the final single-file `svdquant_w4a4` tile-pack checkpoint.
+
+```bash
+comfy-quants qwen-image-edit-2511-int4 \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
+  --out /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
+  --calibration-samples 128 \
+  --search-strength quality-r64 \
+  --awq-group-size 64 \
+  --gpus 0 \
+  --hash-output \
+  --json
+```
+
+Use `--no-awq-modulation` only when you intentionally want to disable the AWQ
+modulation bridge path for a compatible export route. The final artifact is still
+the INT4 tile-pack checkpoint; AWQ W4A16 describes the modulation-layer tensor
+family inside that bundle.
+
+Full guide: [`../quantization/qwen_image_edit_2511_int4.md`](../quantization/qwen_image_edit_2511_int4.md)
+
 ## Identifier
 
 Layer metadata is stored as a uint8 JSON tensor named `<layer>.comfy_quant`:

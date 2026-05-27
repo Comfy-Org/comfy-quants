@@ -30,6 +30,29 @@ Use the built-in solver guide when you are developing or evaluating solver logic
 Use the artifact tools guide when you already have an INT4 artifact and only need
 to inspect or repack it.
 
+## Quick start: Qwen-Image-Edit-2511
+
+This is the shortest path to produce the `svdquant_w4a4` kitchen tile-pack
+checkpoint for Qwen-Image-Edit-2511 with the default 128-sample calibration set
+and `quality-r64` search preset:
+
+```bash
+comfy-quants qwen-image-edit-2511-int4 \
+  --model /path/to/Qwen-Image-Edit-2511 \
+  --base-checkpoint /path/to/qwen_image_edit_2511_bf16_transformer.safetensors \
+  --out /path/to/qwen_image_edit_2511_int4_tilepack.safetensors \
+  --deepcompressor-root /path/to/DeepCompressor \
+  --nunchaku-root /path/to/nunchaku \
+  --calibration-samples 128 \
+  --search-strength quality-r64 \
+  --gpus 0 \
+  --hash-output \
+  --json
+```
+
+Use [`qwen_image_edit_2511_int4.md`](qwen_image_edit_2511_int4.md) for custom
+calibration data, PTQ reuse, dry-run command preview, and output file details.
+
 ## Inspect an INT4 checkpoint
 
 ```bash
