@@ -15,6 +15,36 @@ supported model-family configs below.
 | Qwen-Image | `configs/qwen_image_2512_fp8_static.yaml` | `configs/qwen_image_2512_fp8_e5m2_static.yaml` |
 | Qwen-Image-Edit-2511 | `configs/qwen_image_edit_2511_fp8_static.yaml` | `configs/qwen_image_edit_2511_fp8_e5m2_static.yaml` |
 
+## Quick start: Qwen-Image-Edit-2511
+
+E4M3:
+
+```bash
+comfy-quants export-model \
+  --config configs/qwen_image_edit_2511_fp8_static.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/qwen_image_edit_2511_fp8_e4m3.safetensors \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+E5M2:
+
+```bash
+comfy-quants export-model \
+  --config configs/qwen_image_edit_2511_fp8_e5m2_static.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/qwen_image_edit_2511_fp8_e5m2.safetensors \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+Use `--device auto` when you want CUDA if available and CPU fallback otherwise.
+After export, copy or symlink the `.safetensors` file into the model directory
+used by the compatible ComfyUI loader and run an inference workflow.
+
 ## Inputs
 
 | Input | Argument | Description |

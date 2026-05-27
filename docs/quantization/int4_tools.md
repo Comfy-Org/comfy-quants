@@ -27,13 +27,20 @@ naming rules.
 ```bash
 comfy-quants export-int4 \
   --format svdquant_w4a4 \
-  --source-format <source_format> \
+  --source-format natural-safetensors \
   --source /path/to/int4-source-artifacts \
   --out runs/export-int4 \
   --device cuda:0 \
   --hash-output \
   --json
 ```
+
+Supported `--source-format` values:
+
+| Source format | Use when |
+| --- | --- |
+| `natural-safetensors` | the input is already a natural-layout SVDQuant safetensors file, index, or directory. |
+| `deepcompressor-qwen-image-edit` | the input is a DeepCompressor PTQ artifact directory containing `model.pt`, `scale.pt`, `smooth.pt`, and `branch.pt`. |
 
 Directory output:
 

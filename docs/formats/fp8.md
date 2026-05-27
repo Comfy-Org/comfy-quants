@@ -3,6 +3,39 @@
 This page defines the FP8 checkpoint format mapping used by Comfy Quants exports.
 User commands are documented in [`../quantization/fp8.md`](../quantization/fp8.md).
 
+## How to produce this format
+
+Use `export-model` when you want a full FP8 `.safetensors` checkpoint that can
+be loaded by a compatible ComfyUI setup. Choose one config from the FP8 guide,
+then pass the local dense transformer checkpoint as `--source`.
+
+Example: Qwen-Image-Edit-2511 E4M3:
+
+```bash
+comfy-quants export-model \
+  --config configs/qwen_image_edit_2511_fp8_static.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/qwen_image_edit_2511_fp8_e4m3.safetensors \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+Example: Qwen-Image-Edit-2511 E5M2:
+
+```bash
+comfy-quants export-model \
+  --config configs/qwen_image_edit_2511_fp8_e5m2_static.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/qwen_image_edit_2511_fp8_e5m2.safetensors \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+For all supported FP8 model-family configs and dry-run planning, see
+[`../quantization/fp8.md`](../quantization/fp8.md).
+
 ## Format identifiers
 
 | Comfy Quants target | Torch dtype | Safetensors dtype | ComfyUI checkpoint metadata |
