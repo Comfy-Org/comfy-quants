@@ -39,6 +39,15 @@ _QWEN_IMAGE_CONTRACTS: dict[str, dict[str, Any]] = {
         "model_contract_schema": "qwen_image_edit_static_contract.v1",
         "owner_module": "comfy_quants.model_adapters.qwen_image_edit",
     },
+    "qwen_image_layered": {
+        "schema_version": "qwen_image_layered_contract.v1",
+        "family": "qwen_image_layered",
+        "artifact_target": "comfyui",
+        "export_name": "Qwen-Image-Layered",
+        "consumer_layout": "ComfyUI QwenImage layered",
+        "model_contract_schema": "qwen_image_layered_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.qwen_image_layered",
+    },
 }
 
 

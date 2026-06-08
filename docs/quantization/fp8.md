@@ -14,6 +14,19 @@ supported model-family configs below.
 | --- | --- | --- |
 | Qwen-Image | `configs/qwen_image_2512_fp8_static.yaml` | `configs/qwen_image_2512_fp8_e5m2_static.yaml` |
 | Qwen-Image-Edit-2511 | `configs/qwen_image_edit_2511_fp8_static.yaml` | `configs/qwen_image_edit_2511_fp8_e5m2_static.yaml` |
+| Qwen-Image-Layered | `configs/qwen_image_layered_fp8_static.yaml` | — |
+
+## Quick start: Qwen-Image-Layered
+
+```bash
+comfy-quants export-model \
+  --config configs/qwen_image_layered_fp8_static.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/qwen_image_layered_fp8_e4m3.safetensors \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
 
 ## Quick start: Qwen-Image-Edit-2511
 

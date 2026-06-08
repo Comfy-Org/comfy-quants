@@ -5,6 +5,7 @@ from __future__ import annotations
 # Import built-in adapters for registration side effects.
 from comfy_quants.model_adapters import qwen_image as _qwen_image_adapter  # noqa: F401
 from comfy_quants.model_adapters import qwen_image_edit as _qwen_image_edit_adapter  # noqa: F401
+from comfy_quants.model_adapters import qwen_image_layered as _qwen_image_layered_adapter  # noqa: F401
 from comfy_quants.registry.global_registry import registry
 
 
