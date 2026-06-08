@@ -23,6 +23,7 @@ from comfy_quants.formats import fp8_e5m2 as _fp8_e5m2_format  # noqa: E402,F401
 from comfy_quants.formats import svdquant_w4a4 as _svdquant_w4a4_format  # noqa: E402,F401
 from comfy_quants.model_adapters import qwen_image as _qwen_image_adapter  # noqa: E402,F401
 from comfy_quants.model_adapters import qwen_image_edit as _qwen_image_edit_adapter  # noqa: E402,F401
+from comfy_quants.model_adapters import qwen_image_layered as _qwen_image_layered_adapter  # noqa: E402,F401
 
 
 def list_model_adapters() -> list[str]:

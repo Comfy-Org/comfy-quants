@@ -11,6 +11,7 @@ class TestComfyAlignment(unittest.TestCase):
     def test_registry_has_builtin_components(self):
         self.assertIn("qwen_image", list_adapters())
         self.assertIn("qwen_image_edit", list_adapters())
+        self.assertIn("qwen_image_layered", list_adapters())
         self.assertIn("fp8_static", registry.list_algorithms())
         self.assertIn("fp8_e4m3", registry.list_formats())
         self.assertIn("fp8_e5m2", registry.list_formats())
@@ -37,8 +38,10 @@ class TestComfyAlignment(unittest.TestCase):
         self.assertEqual(contracts["contract_mode"], "static_adapter_contract")
         self.assertIn("qwen_image", contracts["contracts"])
         self.assertIn("qwen_image_edit", contracts["contracts"])
+        self.assertIn("qwen_image_layered", contracts["contracts"])
         self.assertEqual(contracts["contracts"]["qwen_image"]["artifact_target"], "comfyui")
         self.assertEqual(contracts["contracts"]["qwen_image_edit"]["artifact_target"], "comfyui")
+        self.assertEqual(contracts["contracts"]["qwen_image_layered"]["artifact_target"], "comfyui")
         self.assertEqual(
             set(contracts),
             {
@@ -54,6 +57,7 @@ class TestComfyAlignment(unittest.TestCase):
         for family, model_id in [
             ("qwen_image", "Qwen/Qwen-Image"),
             ("qwen_image_edit", "Qwen/Qwen-Image-Edit-2511"),
+            ("qwen_image_layered", "Qwen/Qwen-Image-Layered"),
         ]:
             for target_dtype in ["fp8_e4m3", "fp8_e5m2"]:
                 with self.subTest(family=family, target_dtype=target_dtype):

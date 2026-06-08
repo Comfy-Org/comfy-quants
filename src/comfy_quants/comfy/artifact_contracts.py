@@ -64,3 +64,7 @@ def get_artifact_contract_index() -> ArtifactContractIndex:
 def get_qwen_image_adapter_contract(*, edit: bool = False) -> dict[str, Any]:
     family = "qwen_image_edit" if edit else "qwen_image"
     return dict(_QWEN_IMAGE_CONTRACTS[family])
+
+
+def get_qwen_image_layered_adapter_contract() -> dict[str, Any]:
+    return dict(_QWEN_IMAGE_CONTRACTS["qwen_image_layered"])

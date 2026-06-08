@@ -53,13 +53,17 @@ class QwenImageLayeredAdapter:
 
 def qwen_image_layered_artifact_contract_metadata() -> dict[str, Any]:
     """Build artifact contract metadata for Qwen-Image-Layered."""
-    from comfy_quants.comfy.artifact_contracts import get_artifact_contract_index
+    from comfy_quants.comfy.artifact_contracts import (
+        get_artifact_contract_index,
+        get_qwen_image_layered_adapter_contract,
+    )
 
     contract_index = get_artifact_contract_index()
     return {
         "artifact_target": contract_index.artifact_target,
         "contract_source": contract_index.contract_source,
         "contract_mode": contract_index.contract_mode,
+        "artifact_contract": get_qwen_image_layered_adapter_contract(),
         "adapter_scope": "qwen_image_layered",
     }
 
