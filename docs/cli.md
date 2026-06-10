@@ -47,6 +47,26 @@ comfy-quants export-model \
 
 Guide: [`quantization/fp8.md`](quantization/fp8.md).
 
+## INT8 W8A8 commands
+
+Export a full INT8 W8A8 (+ optional ConvRot) checkpoint for the ComfyUI-INT8-Fast
+node — int8 weights + per-output-channel scales offline; dynamic int8 activations
+and the int8 matmul run downstream:
+
+```bash
+comfy-quants export-model-w8a8 \
+  --config /path/to/int8_w8a8_config.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out runs/export-int8-w8a8 \
+  --device cuda:0 \
+  --convrot \
+  --hash-output \
+  --json
+```
+
+Requires `quant.target_dtype: int8_w8a8` in the config. Use `--no-convrot` for plain
+row-wise W8A8. Guide: [`quantization/int8_w8a8.md`](quantization/int8_w8a8.md).
+
 ## INT4 commands
 
 Open the INT4 format guide first, then choose one of the model-family flows

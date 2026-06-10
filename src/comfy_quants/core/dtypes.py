@@ -13,6 +13,7 @@ class QuantDType(str, Enum):
     FP8_E4M3 = "fp8_e4m3"
     FP8_E5M2 = "fp8_e5m2"
     INT8 = "int8"
+    INT8_W8A8 = "int8_w8a8"
     UINT8 = "uint8"
     INT4 = "int4"
     UINT4 = "uint4"
@@ -42,6 +43,13 @@ KNOWN_DTYPES: dict[str, DTypeSpec] = {
     QuantDType.FP8_E4M3.value: DTypeSpec("fp8_e4m3", 8, "uint8", floating=True),
     QuantDType.FP8_E5M2.value: DTypeSpec("fp8_e5m2", 8, "uint8", floating=True),
     QuantDType.INT8.value: DTypeSpec("int8", 8, "int8"),
+    # W8A8 scheme id (doubles as a format/target id like fp8_e4m3 does): symmetric
+    # per-output-channel int8 weights, dynamic int8 activations downstream, optional
+    # ConvRot weight rotation. See formats/int8_w8a8.py.
+    QuantDType.INT8_W8A8.value: DTypeSpec(
+        "int8_w8a8", 8, "int8",
+        notes="symmetric per-row INT8 weights, dynamic INT8 activations (W8A8), optional ConvRot weight rotation",
+    ),
     QuantDType.UINT8.value: DTypeSpec("uint8", 8, "uint8"),
     QuantDType.INT4.value: DTypeSpec("int4", 4, "uint8", subbyte=True),
     QuantDType.UINT4.value: DTypeSpec("uint4", 4, "uint8", subbyte=True),

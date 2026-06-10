@@ -11,6 +11,7 @@ from comfy_quants.cli import (
     commands_export,
     commands_export_int4,
     commands_export_model,
+    commands_export_model_w8a8,
     commands_inspect,
     commands_inspect_int4,
     commands_jobs,
@@ -74,6 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     commands_export.register(subparsers)
     commands_export_int4.register(subparsers)
     commands_export_model.register(subparsers)
+    commands_export_model_w8a8.register(subparsers)
     commands_jobs.register_jobs(subparsers)
     commands_jobs.register_resume(subparsers)
     _hide_subcommands_from_help(subparsers, HIDDEN_HELP_COMMANDS)

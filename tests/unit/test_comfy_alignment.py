@@ -13,8 +13,10 @@ class TestComfyAlignment(unittest.TestCase):
         self.assertIn("qwen_image_edit", list_adapters())
         self.assertIn("qwen_image_layered", list_adapters())
         self.assertIn("fp8_static", registry.list_algorithms())
+        self.assertIn("int8_w8a8", registry.list_algorithms())
         self.assertIn("fp8_e4m3", registry.list_formats())
         self.assertIn("fp8_e5m2", registry.list_formats())
+        self.assertIn("int8_w8a8", registry.list_formats())
         self.assertIn("torch_ref", registry.list_backends())
 
     def test_qwen_adapter_reports_static_artifact_contract(self):

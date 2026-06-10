@@ -9,6 +9,7 @@ model-family flows for that format. Tensor/storage definitions live under
 | Output format | Workflow guide | Format reference | Model-family flows |
 | --- | --- | --- | --- |
 | FP8 E4M3 / E5M2 checkpoint | [`fp8.md`](fp8.md) | [`../formats/fp8.md`](../formats/fp8.md) | listed in the FP8 guide |
+| INT8 W8A8 (+ConvRot) checkpoint | [`int8_w8a8.md`](int8_w8a8.md) | [`../formats/int8_w8a8.md`](../formats/int8_w8a8.md) | listed in the INT8 W8A8 guide (ComfyUI-INT8-Fast) |
 | INT4 SVDQuant W4A4 tile-pack | [`int4.md`](int4.md) | [`../formats/svdquant_w4a4_kitchen_tilepack.md`](../formats/svdquant_w4a4_kitchen_tilepack.md) | listed in the INT4 guide |
 | INT4 AWQ W4A16 tensors | [`int4.md`](int4.md) | [`../formats/awq_w4a16.md`](../formats/awq_w4a16.md) | used by supported mixed INT4 bundles |
 
@@ -26,6 +27,24 @@ comfy-quants export-model \
   --source /path/to/diffusion_pytorch_model.safetensors \
   --out /path/to/model_fp8.safetensors \
   --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+## INT8 W8A8 (ComfyUI-INT8-Fast)
+
+Start with [`int8_w8a8.md`](int8_w8a8.md) to produce an INT8 W8A8 prequantized
+checkpoint (int8 weights + optional ConvRot rotation) for the downstream
+ComfyUI-INT8-Fast node, which adds dynamic int8 activations + an int8 matmul at
+runtime. Command pattern:
+
+```bash
+comfy-quants export-model-w8a8 \
+  --config /path/to/int8_w8a8_config.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/model_int8_w8a8.safetensors \
+  --device cuda:0 \
+  --convrot \
   --hash-output \
   --json
 ```

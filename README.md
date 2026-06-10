@@ -43,6 +43,7 @@ PYTHONPATH=src python -m comfy_quants.cli.main --help
 | Output format | Use when you want... | Workflow guide | Format reference |
 | --- | --- | --- | --- |
 | FP8 E4M3 / E5M2 checkpoint | a full FP8 transformer checkpoint | [`docs/quantization/fp8.md`](docs/quantization/fp8.md) | [`docs/formats/fp8.md`](docs/formats/fp8.md) |
+| INT8 W8A8 (+ConvRot) checkpoint | a prequantized INT8 checkpoint for the ComfyUI-INT8-Fast node | [`docs/quantization/int8_w8a8.md`](docs/quantization/int8_w8a8.md) | [`docs/formats/int8_w8a8.md`](docs/formats/int8_w8a8.md) |
 | INT4 SVDQuant W4A4 tile-pack | a tile-packed INT4 checkpoint | [`docs/quantization/int4.md`](docs/quantization/int4.md) | [`docs/formats/svdquant_w4a4_kitchen_tilepack.md`](docs/formats/svdquant_w4a4_kitchen_tilepack.md) |
 | INT4 AWQ W4A16 tensors | mixed INT4 modulation tensors inside supported bundles | [`docs/quantization/int4.md`](docs/quantization/int4.md) | [`docs/formats/awq_w4a16.md`](docs/formats/awq_w4a16.md) |
 
@@ -141,6 +142,7 @@ PYTHONPATH=src python -m comfy_quants.cli.main --help
 | 输出格式 | 适用场景 | 流程文档 | 格式定义 |
 | --- | --- | --- | --- |
 | FP8 E4M3 / E5M2 checkpoint | 导出完整 FP8 transformer checkpoint | [`docs/quantization/fp8.md`](docs/quantization/fp8.md) | [`docs/formats/fp8.md`](docs/formats/fp8.md) |
+| INT8 W8A8 (+ConvRot) checkpoint | 为 ComfyUI-INT8-Fast 节点导出预量化 INT8 checkpoint | [`docs/quantization/int8_w8a8.md`](docs/quantization/int8_w8a8.md) | [`docs/formats/int8_w8a8.md`](docs/formats/int8_w8a8.md) |
 | INT4 SVDQuant W4A4 tile-pack | 导出 tile-packed INT4 checkpoint | [`docs/quantization/int4.md`](docs/quantization/int4.md) | [`docs/formats/svdquant_w4a4_kitchen_tilepack.md`](docs/formats/svdquant_w4a4_kitchen_tilepack.md) |
 | INT4 AWQ W4A16 tensors | supported bundle 中的混合 INT4 modulation tensor | [`docs/quantization/int4.md`](docs/quantization/int4.md) | [`docs/formats/awq_w4a16.md`](docs/formats/awq_w4a16.md) |
 
