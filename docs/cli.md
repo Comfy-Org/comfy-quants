@@ -67,6 +67,25 @@ comfy-quants export-model-w8a8 \
 Requires `quant.target_dtype: int8_w8a8` in the config. Use `--no-convrot` for plain
 row-wise W8A8. Guide: [`quantization/int8_w8a8.md`](quantization/int8_w8a8.md).
 
+## MXFP8 commands
+
+Export a full MXFP8 (OCP microscaling FP8) checkpoint for **stock ComfyUI's native**
+loader — `float8_e4m3fn` weights + per-32-element E8M0 block scales (cuBLAS
+`to_blocked` swizzle); the mxfp8 tensor-core matmul runs on Blackwell downstream:
+
+```bash
+comfy-quants export-model-mxfp8 \
+  --config /path/to/mxfp8_config.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out runs/export-mxfp8 \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+Requires `quant.target_dtype: mxfp8` in the config. Guide:
+[`quantization/mxfp8.md`](quantization/mxfp8.md).
+
 ## INT4 commands
 
 Open the INT4 format guide first, then choose one of the model-family flows

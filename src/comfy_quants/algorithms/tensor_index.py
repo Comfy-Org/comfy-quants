@@ -25,6 +25,8 @@ class TensorIndexOptions:
     scale_method: str
     rounding: str
     compatibility_level: str
+    scale_block_size: int | None = None
+    scale_dtype: str = "fp32"
     artifact_state: str = "metadata_only"
     tensor_payload_state: str = "pending_export"
     weight_payload_path: str = DEFAULT_ARTIFACT_PAYLOAD_LAYOUT.weight_payload_path
@@ -64,9 +66,20 @@ def _axis_index(axis: str | int | None, shape: list[int]) -> int | None:
     raise ValueError(f"unsupported scale axis: {axis}")
 
 
-def _scale_shape(tensor: TensorSpec, granularity: str, axis: str | int | None) -> list[int]:
+def _scale_shape(tensor: TensorSpec, granularity: str, axis: str | int | None, block_size: int | None = None) -> list[int]:
     if granularity == "per_tensor":
         return [1]
+    if granularity == "block":
+        index = _axis_index(axis, tensor.shape)
+        if index is None:
+            raise ValueError("block scale requires an axis (the blocked dimension)")
+        if not block_size or block_size <= 0:
+            raise ValueError("block scale requires a positive block_size")
+        # Logical pre-swizzle E8M0 grid: one scale per (row, block) along `axis`.
+        # The on-disk weight_scale is the to_blocked swizzle of this grid (a writer detail).
+        n_blocks = (tensor.shape[index] + block_size - 1) // block_size
+        shape = [dim for i, dim in enumerate(tensor.shape) if i != index]
+        return shape + [n_blocks]
     if granularity != "per_channel":
         raise ValueError(f"unsupported scale granularity: {granularity}")
     index = _axis_index(axis, tensor.shape)
@@ -95,10 +108,11 @@ def _tensor_metadata(
         storage_dtype=storage_dtype,
         algorithm=options.algorithm,
         scale=ScaleMetadata(
-            dtype="fp32",
-            shape=_scale_shape(tensor, options.scale_granularity, axis),
+            dtype=options.scale_dtype,
+            shape=_scale_shape(tensor, options.scale_granularity, axis, options.scale_block_size),
             granularity=options.scale_granularity,
             axis=axis,
+            block_size=options.scale_block_size,
             file=options.scale_payload_path,
             tensor_name=f"{tensor.name}.scale",
         ),

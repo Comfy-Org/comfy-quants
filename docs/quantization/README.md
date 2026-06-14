@@ -10,6 +10,7 @@ model-family flows for that format. Tensor/storage definitions live under
 | --- | --- | --- | --- |
 | FP8 E4M3 / E5M2 checkpoint | [`fp8.md`](fp8.md) | [`../formats/fp8.md`](../formats/fp8.md) | listed in the FP8 guide |
 | INT8 W8A8 (+ConvRot) checkpoint | [`int8_w8a8.md`](int8_w8a8.md) | [`../formats/int8_w8a8.md`](../formats/int8_w8a8.md) | listed in the INT8 W8A8 guide (ComfyUI-INT8-Fast) |
+| MXFP8 microscaling checkpoint | [`mxfp8.md`](mxfp8.md) | [`../formats/mxfp8.md`](../formats/mxfp8.md) | listed in the MXFP8 guide (stock ComfyUI, Blackwell) |
 | INT4 SVDQuant W4A4 tile-pack | [`int4.md`](int4.md) | [`../formats/svdquant_w4a4_kitchen_tilepack.md`](../formats/svdquant_w4a4_kitchen_tilepack.md) | listed in the INT4 guide |
 | INT4 AWQ W4A16 tensors | [`int4.md`](int4.md) | [`../formats/awq_w4a16.md`](../formats/awq_w4a16.md) | used by supported mixed INT4 bundles |
 
@@ -45,6 +46,24 @@ comfy-quants export-model-w8a8 \
   --out /path/to/model_int8_w8a8.safetensors \
   --device cuda:0 \
   --convrot \
+  --hash-output \
+  --json
+```
+
+## MXFP8 (stock ComfyUI native, Blackwell)
+
+Start with [`mxfp8.md`](mxfp8.md) to produce an MXFP8 (OCP microscaling FP8)
+checkpoint for **stock ComfyUI's native** loader — `float8_e4m3fn` weights + E8M0
+block-32 scales (cuBLAS `to_blocked` swizzle), the same per-layer `comfy_quant`
+handshake as FP8. The mxfp8 tensor-core matmul runs on Blackwell (SM ≥ 10); other
+hardware silently dequantizes. Command pattern:
+
+```bash
+comfy-quants export-model-mxfp8 \
+  --config /path/to/mxfp8_config.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out /path/to/model_mxfp8.safetensors \
+  --device cuda:0 \
   --hash-output \
   --json
 ```
