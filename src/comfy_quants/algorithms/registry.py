@@ -6,6 +6,7 @@ from __future__ import annotations
 from comfy_quants.algorithms import fp8_static as _fp8_static_algorithm  # noqa: F401
 from comfy_quants.algorithms import int8_w8a8 as _int8_w8a8_algorithm  # noqa: F401
 from comfy_quants.algorithms import mxfp8 as _mxfp8_algorithm  # noqa: F401
+from comfy_quants.algorithms import nvfp4 as _nvfp4_algorithm  # noqa: F401
 from comfy_quants.registry.global_registry import registry
 
 

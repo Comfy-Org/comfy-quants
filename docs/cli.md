@@ -86,6 +86,26 @@ comfy-quants export-model-mxfp8 \
 Requires `quant.target_dtype: mxfp8` in the config. Guide:
 [`quantization/mxfp8.md`](quantization/mxfp8.md).
 
+## NVFP4 commands
+
+Export a full NVFP4 (FP4 E2M1 microscaling) checkpoint for **stock ComfyUI's native**
+loader — packed FP4-E2M1 weights + per-block-16 FP8-E4M3 block scales (cuBLAS
+`to_blocked` swizzle) + a per-tensor FP32 scale; the nvfp4 tensor-core matmul runs on
+Blackwell downstream:
+
+```bash
+comfy-quants export-model-nvfp4 \
+  --config /path/to/nvfp4_config.yaml \
+  --source /path/to/diffusion_pytorch_model.safetensors \
+  --out runs/export-nvfp4 \
+  --device cuda:0 \
+  --hash-output \
+  --json
+```
+
+Requires `quant.target_dtype: nvfp4` in the config. Guide:
+[`quantization/nvfp4.md`](quantization/nvfp4.md).
+
 ## INT4 commands
 
 Open the INT4 format guide first, then choose one of the model-family flows
