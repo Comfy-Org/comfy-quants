@@ -26,7 +26,7 @@ FP8_E4M3_FORMAT = QuantFormatSpec(
     category="floating_point",
     scale_required=True,
     default_scale_granularity="per_tensor",
-    compatible_families=("qwen_image", "qwen_image_edit"),
+    compatible_families=("qwen_image", "qwen_image_edit", "anima", "anima_14b"),
     notes=(
         "Default FP8 format for Qwen image exports.",
         "Reusable across model adapters; not owned by any single Qwen adapter.",

@@ -41,7 +41,7 @@ NVFP4_FORMAT = QuantFormatSpec(
     category="floating_point_block_scaled",
     scale_required=True,
     default_scale_granularity="block",
-    compatible_families=("qwen_image", "qwen_image_edit", "qwen_image_layered"),
+    compatible_families=("qwen_image", "qwen_image_edit", "qwen_image_layered", "anima", "anima_14b"),
     notes=(
         "NVFP4: FP4-E2M1 weights packed 2/byte (uint8) + per-block-16 fp8 scale + per-tensor fp32 scale.",
         "weight_scale (block) stored as float8_e4m3fn in the cuBLAS to_blocked swizzle.",

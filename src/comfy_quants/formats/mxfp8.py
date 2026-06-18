@@ -42,7 +42,7 @@ MXFP8_FORMAT = QuantFormatSpec(
     category="floating_point_block_scaled",
     scale_required=True,
     default_scale_granularity="block",
-    compatible_families=("qwen_image", "qwen_image_edit", "qwen_image_layered"),
+    compatible_families=("qwen_image", "qwen_image_edit", "qwen_image_layered", "anima", "anima_14b"),
     notes=(
         "MXFP8: float8_e4m3fn weights + per-32-element E8M0 block scale (OCP microscaling).",
         "weight_scale stored as uint8 in the cuBLAS to_blocked swizzle; loaded as float8_e8m0fnu.",

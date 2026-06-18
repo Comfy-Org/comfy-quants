@@ -87,6 +87,13 @@ comfy-quants export-model-nvfp4 \
   --json
 ```
 
+## Model families
+
+Format guides above are family-agnostic. For per-family flows beyond Qwen-Image, see:
+
+- **Anima** (cosmos_predict2 DiT + llm_adapter) — FP8 / MXFP8 / NVFP4:
+  [`anima.md`](anima.md).
+
 ## INT4
 
 Start with [`int4.md`](int4.md) when the target artifact is an INT4 tile-pack

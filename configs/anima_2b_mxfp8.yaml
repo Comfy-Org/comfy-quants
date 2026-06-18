@@ -1,0 +1,36 @@
+project:
+  name: anima-2b-mxfp8-v0
+  created_by: comfy_quants
+  seed: 42
+model:
+  family: anima
+  model_id: Comfy-Org/anima
+  revision: "<pin-this>"
+  dtype: bf16
+  source: huggingface
+  trust_remote_code: false
+  components:
+    transformer: quantize
+    llm_adapter: keep_bf16
+    vae: keep_bf16
+    text_encoder: keep_bf16
+quant:
+  algorithm: mxfp8
+  target_dtype: mxfp8
+  scale:
+    granularity: block
+    axis: in_features
+    method: amax
+  rounding: nearest_even
+  modules:
+    include:
+      - "net.blocks.*"
+    exclude:
+      - "net.blocks.0.*"
+      - "net.blocks.1.adaln_modulation*"
+  fallback:
+    on_error: keep_bf16
+artifact:
+  format: safetensors_quant
+  compatibility_target: L2
+  write_module_reports: true

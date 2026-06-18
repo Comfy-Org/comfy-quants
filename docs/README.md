@@ -12,6 +12,7 @@ model-family flows currently implemented for that format.
 | Export INT8 W8A8 (+ConvRot) checkpoints | [`quantization/int8_w8a8.md`](quantization/int8_w8a8.md) |
 | Export MXFP8 (microscaling, Blackwell) checkpoints | [`quantization/mxfp8.md`](quantization/mxfp8.md) |
 | Export NVFP4 (FP4 microscaling, Blackwell) checkpoints | [`quantization/nvfp4.md`](quantization/nvfp4.md) |
+| Quantize the Anima family (FP8/MXFP8/NVFP4) | [`quantization/anima.md`](quantization/anima.md) |
 | Export INT4 tile-pack checkpoints | [`quantization/int4.md`](quantization/int4.md) |
 | Look up command syntax | [`cli.md`](cli.md) |
 | Understand repository architecture | [`architecture.md`](architecture.md) |

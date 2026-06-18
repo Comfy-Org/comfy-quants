@@ -51,13 +51,35 @@ _QWEN_IMAGE_CONTRACTS: dict[str, dict[str, Any]] = {
 }
 
 
+_ANIMA_CONTRACTS: dict[str, dict[str, Any]] = {
+    "anima": {
+        "schema_version": "anima_contract.v1",
+        "family": "anima",
+        "artifact_target": "comfyui",
+        "export_name": "Anima",
+        "consumer_layout": "ComfyUI Anima",
+        "model_contract_schema": "anima_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.anima",
+    },
+    "anima_14b": {
+        "schema_version": "anima_14b_contract.v1",
+        "family": "anima_14b",
+        "artifact_target": "comfyui",
+        "export_name": "Anima-14B",
+        "consumer_layout": "ComfyUI Anima",
+        "model_contract_schema": "anima_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.anima",
+    },
+}
+
+
 def get_artifact_contract_index() -> ArtifactContractIndex:
     return ArtifactContractIndex(
         schema_version="artifact_contract_index.v1",
         artifact_target="comfyui",
         contract_source="comfy_quants",
         contract_mode="static_adapter_contract",
-        contracts=_QWEN_IMAGE_CONTRACTS,
+        contracts={**_QWEN_IMAGE_CONTRACTS, **_ANIMA_CONTRACTS},
     )
 
 
@@ -68,3 +90,8 @@ def get_qwen_image_adapter_contract(*, edit: bool = False) -> dict[str, Any]:
 
 def get_qwen_image_layered_adapter_contract() -> dict[str, Any]:
     return dict(_QWEN_IMAGE_CONTRACTS["qwen_image_layered"])
+
+
+def get_anima_adapter_contract(model_channels: int = 2048) -> dict[str, Any]:
+    family = "anima" if model_channels == 2048 else "anima_14b"
+    return dict(_ANIMA_CONTRACTS[family])

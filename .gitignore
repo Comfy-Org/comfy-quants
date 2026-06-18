@@ -28,3 +28,6 @@ venv/
 .DS_Store
 .idea/
 .vscode/
+
+#toll
+CLAUDE.md
