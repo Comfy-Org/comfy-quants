@@ -1,0 +1,73 @@
+"""Qwen-Image-Layered model adapter."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from comfy_quants.core.policy import QuantPolicy
+from comfy_quants.model_adapters.base import ModelSource
+from comfy_quants.model_adapters.qwen_contracts.qwen_image_layered import get_qwen_image_layered_static_contract
+from comfy_quants.model_adapters.qwen_graph_builder import build_qwen_graph_from_contract, summarize_qwen_graph
+
+
+class QwenImageLayeredAdapter:
+    """Adapter for Qwen-Image-Layered text-to-image models."""
+
+    family = "qwen_image_layered"
+    supported_model_ids = ["Qwen/Qwen-Image-Layered"]
+
+    def inspect(self, source: ModelSource):
+        contract = get_qwen_image_layered_static_contract()
+        graph = build_qwen_graph_from_contract(
+            contract,
+            source,
+            artifact_metadata=qwen_image_layered_artifact_contract_metadata(),
+        )
+        return summarize_qwen_graph(graph, self.__class__.__name__), graph
+
+    def default_policy(self, target_dtype: str = "fp8_e4m3") -> QuantPolicy:
+        return QuantPolicy(
+            name="qwen_image_layered_default_fp8_static",
+            algorithm="fp8_static",
+            target_dtype=target_dtype,
+            include=[
+                "transformer_blocks.*.attn.to_*",
+                "transformer_blocks.*.attn.add_*_proj",
+                "transformer_blocks.*.img_mlp.*",
+                "transformer_blocks.*.txt_mlp.*",
+                "transformer_blocks.*.img_mod.1",
+                "transformer_blocks.*.txt_mod.1",
+            ],
+            exclude=[
+                "transformer_blocks.0.img_mod.1",
+                "*.norm*",
+                "*txt_norm*",
+                "*norm_out*",
+                "*proj_out*",
+                "*vae*",
+                "*text_encoder*",
+            ],
+            keep_components=["vae", "text_encoder"],
+        )
+
+
+def qwen_image_layered_artifact_contract_metadata() -> dict[str, Any]:
+    """Build artifact contract metadata for Qwen-Image-Layered."""
+    from comfy_quants.comfy.artifact_contracts import (
+        get_artifact_contract_index,
+        get_qwen_image_layered_adapter_contract,
+    )
+
+    contract_index = get_artifact_contract_index()
+    return {
+        "artifact_target": contract_index.artifact_target,
+        "contract_source": contract_index.contract_source,
+        "contract_mode": contract_index.contract_mode,
+        "artifact_contract": get_qwen_image_layered_adapter_contract(),
+        "adapter_scope": "qwen_image_layered",
+    }
+
+
+from comfy_quants.registry.global_registry import registry  # noqa: E402
+
+registry.register_adapter(QwenImageLayeredAdapter())

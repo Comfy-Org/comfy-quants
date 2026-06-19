@@ -1,0 +1,48 @@
+project:
+  name: qwen-image-2512-int8-w8a8-v0
+  created_by: comfy_quants
+  seed: 42
+model:
+  family: qwen_image
+  model_id: Qwen/Qwen-Image-2512
+  revision: "<pin-this>"
+  dtype: bf16
+  source: huggingface
+  trust_remote_code: false
+  components:
+    transformer: quantize
+    vae: keep_bf16
+    text_encoder: keep_bf16
+hardware:
+  device: cuda:0
+  gpu_profile: rtx_pro_6000_blackwell_96gb
+  max_vram_gb: 88
+  cpu_offload: true
+  nvme_offload: false
+  scratch_dir: runs/qwen-image-2512/scratch
+quant:
+  algorithm: int8_w8a8
+  target_dtype: int8_w8a8
+  scale:
+    granularity: per_channel
+    axis: out_features
+    method: amax
+  rounding: nearest_even
+  # Exclude-driven selection matching ComfyUI-INT8-Fast's qwen exclusion list
+  # (int8_unet_loader.py). Empty include => all quantizable Linear pass the gate.
+  # NOTE (vs the FP8 config): INT8-Fast does NOT special-case transformer_blocks.0.img_mod.1.
+  modules:
+    include: []
+    exclude:
+      - "*time_text_embed*"
+      - "*img_in*"
+      - "*norm_out*"
+      - "*proj_out*"
+      - "*txt_in*"
+  fallback:
+    on_error: keep_bf16
+artifact:
+  format: safetensors_quant
+  compatibility_target: L2
+  save_reference_dequant: false
+  write_module_reports: true

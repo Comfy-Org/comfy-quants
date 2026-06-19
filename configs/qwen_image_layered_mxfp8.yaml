@@ -1,0 +1,56 @@
+project:
+  name: qwen-image-layered-mxfp8-v0
+  created_by: comfy_quants
+  seed: 42
+model:
+  family: qwen_image_layered
+  model_id: Qwen/Qwen-Image-Layered
+  revision: "<pin-this>"
+  dtype: bf16
+  source: huggingface
+  trust_remote_code: false
+  components:
+    transformer: quantize
+    vae: keep_bf16
+    text_encoder: keep_bf16
+hardware:
+  device: cuda:0
+  gpu_profile: rtx_pro_6000_blackwell_96gb
+  max_vram_gb: 88
+  cpu_offload: true
+  nvme_offload: false
+  scratch_dir: runs/qwen-image-layered/scratch
+calibration:
+  source: runs/qwen-image-layered/calib-v0
+  batch_size: 1
+  capture_dtype: bf16
+  activation_cache: runs/qwen-image-layered/cache/calib-v0
+quant:
+  algorithm: mxfp8
+  target_dtype: mxfp8
+  scale:
+    granularity: block
+    axis: in_features
+    method: amax
+  rounding: nearest_even
+  modules:
+    include:
+      - "transformer_blocks.*.attn.to_*"
+      - "transformer_blocks.*.attn.add_*_proj"
+      - "transformer_blocks.*.img_mlp.*"
+      - "transformer_blocks.*.txt_mlp.*"
+      - "transformer_blocks.*.img_mod.1"
+      - "transformer_blocks.*.txt_mod.1"
+    exclude:
+      - "transformer_blocks.0.img_mod.1"
+      - "*.norm*"
+      - "*txt_norm*"
+      - "*norm_out*"
+      - "*proj_out*"
+  fallback:
+    on_error: keep_bf16
+artifact:
+  format: safetensors_quant
+  compatibility_target: L2
+  save_reference_dequant: false
+  write_module_reports: true

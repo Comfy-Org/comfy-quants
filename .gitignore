@@ -1,0 +1,33 @@
+# Python cache / test artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Build / packaging artifacts
+build/
+dist/
+*.egg-info/
+src/*.egg-info/
+
+# Runtime outputs and local experiment data
+runs/
+
+# Virtualenvs and local env files
+.venv/
+venv/
+.env
+.env.*
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
+
+#toll
+CLAUDE.md

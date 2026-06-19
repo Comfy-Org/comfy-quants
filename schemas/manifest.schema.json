@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Comfy Quants Artifact Manifest",
+  "type": "object",
+  "required": ["schema_version", "artifact_id", "created_at", "model", "quantization", "calibration", "hardware", "compatibility", "files", "hashes", "validation"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "artifact_id": {"type": "string"},
+    "created_at": {"type": "string"},
+    "model": {"type": "object"},
+    "quantization": {"type": "object"},
+    "calibration": {"type": "object"},
+    "hardware": {"type": "object"},
+    "compatibility": {"type": "object"},
+    "files": {"type": "array"},
+    "hashes": {"type": "object"},
+    "validation": {"type": "object"}
+  }
+}
