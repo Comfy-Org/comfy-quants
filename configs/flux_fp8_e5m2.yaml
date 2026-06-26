@@ -1,0 +1,34 @@
+project:
+  name: flux-fp8-e5m2-v0
+  created_by: comfy_quants
+  seed: 42
+model:
+  family: flux
+  model_id: black-forest-labs/FLUX.1-dev
+  revision: "<pin-this>"
+  dtype: bf16
+  source: huggingface
+  trust_remote_code: false
+  components:
+    transformer: quantize
+    text_encoder: keep_bf16
+    vae: keep_bf16
+quant:
+  algorithm: fp8_static
+  target_dtype: fp8_e5m2
+  scale:
+    granularity: per_tensor
+    axis: null
+    method: amax
+  rounding: nearest_even
+  modules:
+    include:
+      - "double_blocks.*"
+      - "single_blocks.*"
+    exclude: []
+  fallback:
+    on_error: keep_bf16
+artifact:
+  format: safetensors_quant
+  compatibility_target: L2
+  write_module_reports: true

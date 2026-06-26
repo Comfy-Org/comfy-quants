@@ -73,13 +73,53 @@ _ANIMA_CONTRACTS: dict[str, dict[str, Any]] = {
 }
 
 
+_STOCK_DIT_CONTRACTS: dict[str, dict[str, Any]] = {
+    "flux": {
+        "schema_version": "flux_contract.v1",
+        "family": "flux",
+        "artifact_target": "comfyui",
+        "export_name": "FLUX.1",
+        "consumer_layout": "ComfyUI flux",
+        "model_contract_schema": "flux_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.flux",
+    },
+    "flux2": {
+        "schema_version": "flux2_contract.v1",
+        "family": "flux2",
+        "artifact_target": "comfyui",
+        "export_name": "FLUX.2",
+        "consumer_layout": "ComfyUI flux2",
+        "model_contract_schema": "flux2_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.flux2",
+    },
+    "ltxv": {
+        "schema_version": "ltxv_contract.v1",
+        "family": "ltxv",
+        "artifact_target": "comfyui",
+        "export_name": "LTX-Video",
+        "consumer_layout": "ComfyUI ltxv",
+        "model_contract_schema": "ltxv_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.ltxv",
+    },
+    "ideogram4": {
+        "schema_version": "ideogram4_contract.v1",
+        "family": "ideogram4",
+        "artifact_target": "comfyui",
+        "export_name": "Ideogram-4",
+        "consumer_layout": "ComfyUI ideogram4",
+        "model_contract_schema": "ideogram4_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.ideogram4",
+    },
+}
+
+
 def get_artifact_contract_index() -> ArtifactContractIndex:
     return ArtifactContractIndex(
         schema_version="artifact_contract_index.v1",
         artifact_target="comfyui",
         contract_source="comfy_quants",
         contract_mode="static_adapter_contract",
-        contracts={**_QWEN_IMAGE_CONTRACTS, **_ANIMA_CONTRACTS},
+        contracts={**_QWEN_IMAGE_CONTRACTS, **_ANIMA_CONTRACTS, **_STOCK_DIT_CONTRACTS},
     )
 
 
@@ -95,3 +135,7 @@ def get_qwen_image_layered_adapter_contract() -> dict[str, Any]:
 def get_anima_adapter_contract(model_channels: int = 2048) -> dict[str, Any]:
     family = "anima" if model_channels == 2048 else "anima_14b"
     return dict(_ANIMA_CONTRACTS[family])
+
+
+def get_stock_dit_adapter_contract(family: str) -> dict[str, Any]:
+    return dict(_STOCK_DIT_CONTRACTS[family])
