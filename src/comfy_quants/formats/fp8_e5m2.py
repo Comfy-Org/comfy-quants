@@ -26,7 +26,7 @@ FP8_E5M2_FORMAT = QuantFormatSpec(
     category="floating_point",
     scale_required=True,
     default_scale_granularity="per_tensor",
-    compatible_families=("qwen_image", "qwen_image_edit", "anima", "anima_14b"),
+    compatible_families=("qwen_image", "qwen_image_edit", "anima", "anima_14b", "flux", "flux2", "ltxv", "ideogram4"),
     notes=(
         "FP8 E5M2 checkpoint format for Qwen image exports.",
         "Reusable across model adapters; not owned by any single Qwen adapter.",
