@@ -93,6 +93,14 @@ Format guides above are family-agnostic. For per-family flows beyond Qwen-Image,
 
 - **Anima** (cosmos_predict2 DiT + llm_adapter) — FP8 / MXFP8 / NVFP4:
   [`anima.md`](anima.md).
+- **FLUX.1** (MMDiT, double + single blocks) — FP8 / MXFP8 / NVFP4:
+  [`flux.md`](flux.md).
+- **FLUX.2** (MMDiT, gated MLP + global modulation; mixed-precision recipe) — FP8 / MXFP8 / NVFP4:
+  [`flux2.md`](flux2.md).
+- **LTX-Video** (Lightricks video DiT; `model.diffusion_model.` prefix) — FP8 / MXFP8 / NVFP4:
+  [`ltxv.md`](ltxv.md).
+- **Ideogram 4.0** (open-weight NextDiT/Lumina2; fp8→mxfp8 transcoding) — FP8 / MXFP8 / NVFP4:
+  [`ideogram4.md`](ideogram4.md).
 
 ## INT4
 

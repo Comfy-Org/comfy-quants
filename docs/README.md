@@ -13,6 +13,10 @@ model-family flows currently implemented for that format.
 | Export MXFP8 (microscaling, Blackwell) checkpoints | [`quantization/mxfp8.md`](quantization/mxfp8.md) |
 | Export NVFP4 (FP4 microscaling, Blackwell) checkpoints | [`quantization/nvfp4.md`](quantization/nvfp4.md) |
 | Quantize the Anima family (FP8/MXFP8/NVFP4) | [`quantization/anima.md`](quantization/anima.md) |
+| Quantize the FLUX.1 family (FP8/MXFP8/NVFP4) | [`quantization/flux.md`](quantization/flux.md) |
+| Quantize the FLUX.2 family (FP8/MXFP8/NVFP4, + mixed) | [`quantization/flux2.md`](quantization/flux2.md) |
+| Quantize the LTX-Video family (FP8/MXFP8/NVFP4) | [`quantization/ltxv.md`](quantization/ltxv.md) |
+| Quantize the Ideogram 4.0 family (FP8/MXFP8/NVFP4, + transcode) | [`quantization/ideogram4.md`](quantization/ideogram4.md) |
 | Export INT4 tile-pack checkpoints | [`quantization/int4.md`](quantization/int4.md) |
 | Look up command syntax | [`cli.md`](cli.md) |
 | Understand repository architecture | [`architecture.md`](architecture.md) |
