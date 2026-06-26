@@ -1,0 +1,39 @@
+project:
+  name: flux2-mxfp8-mixed-v0
+  created_by: comfy_quants
+  seed: 42
+# Mixed-precision recipe: matches official flux2_dev_fp8mixed (keep double-stream
+# attention in bf16; quantize MLP + fused single-stream linears). Better 32B image
+# fidelity at ~6% more weight size than the full-quant configs.
+model:
+  family: flux2
+  model_id: black-forest-labs/FLUX.2-dev
+  revision: "<pin-this>"
+  dtype: bf16
+  source: huggingface
+  trust_remote_code: false
+  components:
+    transformer: quantize
+    text_encoder: keep_bf16
+    vae: keep_bf16
+quant:
+  algorithm: mxfp8
+  target_dtype: mxfp8
+  scale:
+    granularity: block
+    axis: in_features
+    method: amax
+  rounding: nearest_even
+  modules:
+    include:
+      - "double_blocks.*"
+      - "single_blocks.*"
+    exclude:
+      - "*_attn.qkv"
+      - "*_attn.proj"
+  fallback:
+    on_error: keep_bf16
+artifact:
+  format: safetensors_quant
+  compatibility_target: L2
+  write_module_reports: true
