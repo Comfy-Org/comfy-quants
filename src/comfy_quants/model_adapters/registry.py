@@ -10,6 +10,7 @@ from comfy_quants.model_adapters import anima as _anima_adapter  # noqa: F401
 from comfy_quants.model_adapters import flux as _flux_adapter  # noqa: F401
 from comfy_quants.model_adapters import flux2 as _flux2_adapter  # noqa: F401
 from comfy_quants.model_adapters import ltxv as _ltxv_adapter  # noqa: F401
+from comfy_quants.model_adapters import ideogram4 as _ideogram4_adapter  # noqa: F401
 from comfy_quants.registry.global_registry import registry
 
 
