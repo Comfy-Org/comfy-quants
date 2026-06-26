@@ -99,7 +99,7 @@ Format guides above are family-agnostic. For per-family flows beyond Qwen-Image,
   [`flux2.md`](flux2.md).
 - **LTX-Video** (Lightricks video DiT; `model.diffusion_model.` prefix) — FP8 / MXFP8 / NVFP4:
   [`ltxv.md`](ltxv.md).
-- **Ideogram 4.0** (open-weight NextDiT/Lumina2; fp8→mxfp8 transcoding) — FP8 / MXFP8 / NVFP4:
+- **Ideogram 4.0** (open-weight NextDiT/Lumina2; fp8→bf16→mxfp8 transcoding) — FP8 / MXFP8 / NVFP4:
   [`ideogram4.md`](ideogram4.md).
 
 ## INT4

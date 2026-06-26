@@ -2,9 +2,10 @@ project:
   name: flux2-nvfp4-mixed-v0
   created_by: comfy_quants
   seed: 42
-# Mixed-precision recipe: matches official flux2_dev_fp8mixed (keep double-stream
-# attention in bf16; quantize MLP + fused single-stream linears). Better 32B image
-# fidelity at ~6% more weight size than the full-quant configs.
+# Mixed-precision recipe (nvfp4 base): keep double-stream attention in bf16; quantize
+# MLP + fused single-stream linears. Note: relative to the full nvfp4 config the bf16
+# attention adds substantially more than the ~6% seen in fp8mixed, since the base weights
+# here are 4-bit (bf16 attention is ~4x those weights vs nvfp4).
 model:
   family: flux2
   model_id: black-forest-labs/FLUX.2-dev
