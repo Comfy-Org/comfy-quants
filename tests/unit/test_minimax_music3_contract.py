@@ -1,9 +1,11 @@
 import unittest
+from typing import Any
 
 from comfy_quants.algorithms.tensor_index import (
     TensorIndexOptions,
     build_quant_tensor_index,
 )
+from comfy_quants.core.graph import ModelGraph, TensorSpec
 from comfy_quants.model_adapters.base import ModelSource
 from comfy_quants.model_adapters.minimax_music3 import (
     MODEL_REPOSITORY,
@@ -14,13 +16,13 @@ from comfy_quants.model_adapters.minimax_music3 import (
 from comfy_quants.model_adapters.registry import get_adapter
 
 
-def _tensors_by_name(graph):
+def _tensors_by_name(graph: ModelGraph) -> dict[str, TensorSpec]:
     return {
         tensor.name: tensor for module in graph.modules for tensor in module.tensors
     }
 
 
-def _nvfp4_index(family):
+def _nvfp4_index(family: str) -> dict[str, Any]:
     adapter = get_adapter(family)
     _inspection, graph = adapter.inspect(
         ModelSource(family=family, model_id=MODEL_REPOSITORY, revision=MODEL_REVISION)
