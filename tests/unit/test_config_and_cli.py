@@ -38,6 +38,20 @@ class TestConfigAndCli(unittest.TestCase):
             plan = json.loads((work_dir / "plan.json").read_text())
             self.assertGreater(len(plan["steps"]), 0)
 
+    def test_load_minimax_music3_nvfp4_configs(self):
+        expected = {
+            "configs/minimax_music3_dit_nvfp4.yaml": "minimax_music3_dit",
+            "configs/minimax_music3_text_encoder_nvfp4.yaml": "minimax_music3_text_encoder",
+        }
+        for path, family in expected.items():
+            with self.subTest(path=path):
+                cfg = load_quant_config(path)
+                self.assertEqual(cfg.model.family, family)
+                self.assertEqual(cfg.quant.algorithm, "nvfp4")
+                self.assertEqual(cfg.quant.target_dtype, "nvfp4")
+                self.assertEqual(cfg.quant.scale.granularity, "block")
+                self.assertEqual(cfg.quant.scale.axis, "in_features")
+
 
 if __name__ == "__main__":
     unittest.main()

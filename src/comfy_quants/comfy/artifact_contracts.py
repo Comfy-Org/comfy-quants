@@ -120,6 +120,24 @@ _STOCK_DIT_CONTRACTS: dict[str, dict[str, Any]] = {
         "model_contract_schema": "ideogram4_static_contract.v1",
         "owner_module": "comfy_quants.model_adapters.ideogram4",
     },
+    "minimax_music3_dit": {
+        "schema_version": "minimax_music3_dit_contract.v1",
+        "family": "minimax_music3_dit",
+        "artifact_target": "comfyui",
+        "export_name": "MiniMax-Music-3 DiT",
+        "consumer_layout": "ComfyUI MiniMaxMusic3 diffusion model",
+        "model_contract_schema": "minimax_music3_dit_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.minimax_music3",
+    },
+    "minimax_music3_text_encoder": {
+        "schema_version": "minimax_music3_text_encoder_contract.v1",
+        "family": "minimax_music3_text_encoder",
+        "artifact_target": "comfyui",
+        "export_name": "MiniMax-Music-3 text encoder",
+        "consumer_layout": "ComfyUI MiniMaxMusic3 text encoder",
+        "model_contract_schema": "minimax_music3_text_encoder_static_contract.v1",
+        "owner_module": "comfy_quants.model_adapters.minimax_music3",
+    },
 }
 
 
