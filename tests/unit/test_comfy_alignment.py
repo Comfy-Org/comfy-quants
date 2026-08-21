@@ -19,6 +19,8 @@ class TestComfyAlignment(unittest.TestCase):
         self.assertIn("ltxv", list_adapters())
         self.assertIn("ltx2", list_adapters())
         self.assertIn("ideogram4", list_adapters())
+        self.assertIn("minimax_music3_dit", list_adapters())
+        self.assertIn("minimax_music3_text_encoder", list_adapters())
         self.assertIn("fp8_static", registry.list_algorithms())
         self.assertIn("int8_w8a8", registry.list_algorithms())
         self.assertIn("int8_tensorwise", registry.list_algorithms())
@@ -63,6 +65,14 @@ class TestComfyAlignment(unittest.TestCase):
         self.assertEqual(contracts["contracts"]["ltx2"]["consumer_layout"], "ComfyUI ltxav")
         self.assertIn("ideogram4", contracts["contracts"])
         self.assertEqual(contracts["contracts"]["ideogram4"]["export_name"], "Ideogram-4")
+        self.assertEqual(
+            contracts["contracts"]["minimax_music3_dit"]["consumer_layout"],
+            "ComfyUI MiniMaxMusic3 diffusion model",
+        )
+        self.assertEqual(
+            contracts["contracts"]["minimax_music3_text_encoder"]["consumer_layout"],
+            "ComfyUI MiniMaxMusic3 text encoder",
+        )
         self.assertEqual(contracts["contracts"]["anima"]["artifact_target"], "comfyui")
         self.assertEqual(contracts["contracts"]["qwen_image"]["artifact_target"], "comfyui")
         self.assertEqual(contracts["contracts"]["qwen_image_edit"]["artifact_target"], "comfyui")

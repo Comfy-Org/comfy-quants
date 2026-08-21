@@ -104,6 +104,8 @@ Format guides above are family-agnostic. For per-family flows beyond Qwen-Image,
   keep recipe) — FP8 / MXFP8 / NVFP4 / INT8 W8A8 / INT8 tensorwise: [`ltx2.md`](ltx2.md).
 - **Ideogram 4.0** (open-weight NextDiT/Lumina2; fp8→bf16→mxfp8 transcoding) — FP8 / MXFP8 / NVFP4:
   [`ideogram4.md`](ideogram4.md).
+- **MiniMax Music 3** (separate 36-layer DiT and 36-layer AR encoder artifacts) — NVFP4:
+  [`minimax_music3.md`](minimax_music3.md).
 
 ## INT4
 
